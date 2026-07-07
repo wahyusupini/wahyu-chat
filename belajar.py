@@ -1,7 +1,5 @@
 import streamlit as st
 from google import genai
-if "genai_client" not in st.session_state:
- st.session_state.genai_client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 
 # Konfigurasi Halaman
 st.title("Gemini Chatbot")
@@ -13,16 +11,19 @@ with st.sidebar:
     google_api_key = st.text_input("Google AI API Key", type="password")
     reset_button = st.button("Reset Percakapan")
 
+# Jika API Key di sidebar kosong, hentikan aplikasi dengan rapi (tampilkan info)
 if not google_api_key:
     st.info("Masukkan Google AI API Key di sidebar untuk memulai.")
     st.stop()
 
+# Inisialisasi client dari input sidebar
 try:
     client = genai.Client(api_key=google_api_key)
 except Exception as e:
     st.error(f"API Key tidak valid: {e}")
     st.stop()
 
+# Inisialisasi chat session menggunakan client dari sidebar
 if "chat" not in st.session_state:
     st.session_state.chat = client.chats.create(model="gemini-2.5-flash")
 
@@ -33,10 +34,12 @@ if reset_button:
     st.session_state.chat = client.chats.create(model="gemini-2.5-flash")
     st.session_state.messages = []
 
+# Tampilkan pesan
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
+# Input chat dari user
 if prompt := st.chat_input("Ketik pesanmu di sini..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
