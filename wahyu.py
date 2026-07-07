@@ -5,7 +5,7 @@ from google.genai import types
 # =====================================================================
 # 1. KONFIGURASI API KEY (Sudah dibungkus tanda kutip dengan benar)
 # =====================================================================
-GEMINI_API_KEY = "AQ.Ab8RN6KYRa7OvT1O6RayeQCeD2RcL8_B0EABc5yrK7WS9ZH75w"
+client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 
 # Inisialisasi Google GenAI Client menggunakan variabel API Key
 client = genai.Client(api_key=GEMINI_API_KEY)
