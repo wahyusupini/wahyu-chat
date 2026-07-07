@@ -1,5 +1,7 @@
 import streamlit as st
 from google import genai
+if "genai_client" not in st.session_state:
+ st.session_state.genai_client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 
 # Konfigurasi Halaman
 st.title("Gemini Chatbot")
