@@ -50,7 +50,7 @@ st.markdown("""
 
 # Menampilkan Judul dengan Gaya Baru
 st.markdown('<div class="main-title">💻 Gemini SQL Chatbot Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Asisten Database Toko Komputer dengan Grounding, Fitur Suara & Aturan Ketat</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Asisten Database dengan Grounding & Pilihan Suara Pria/Wanita</div>', unsafe_allow_html=True)
 
 # 2. Sidebar Pengaturan
 with st.sidebar:
@@ -59,12 +59,32 @@ with st.sidebar:
     google_api_key = st.text_input("Google AI API Key", type="password", placeholder="Masukkan API Key Anda...")
     
     st.markdown("---")
-    st.subheader("🔊 Kontrol Suara")
-    # FITUR MENARIK: Kontrol Suara
+    st.subheader("🔊 Pengaturan Suara")
     enable_voice = st.checkbox("Aktifkan Suara Bot (Auto-Speak)", value=False)
+    
+    # FITUR MENARIK: Pilihan Karakter Suara Pria dan Wanita
+    voice_character = st.selectbox(
+        "Pilih Karakter Suara:",
+        [
+            "Wanita (Sari - Lembut & Ramah)", 
+            "Wanita (Sinta - Tegas & Formal)", 
+            "Pria (Budi - Berat & Karismatik)", 
+            "Pria (Rendi - Cepat & Energetik)"
+        ]
+    )
     
     st.markdown("---")
     reset_button = st.button("🔄 Reset Percakapan", use_container_width=True)
+
+# Pengaturan parameter suara berdasarkan pilihan karakter
+# Pitch: Tinggi/rendahnya suara (Wanita cenderung tinggi > 1.0, Pria cenderung rendah < 1.0)
+# Rate: Kecepatan berbicara
+voice_params = {
+    "Wanita (Sari - Lembut & Ramah)": {"pitch": 1.2, "rate": 0.95},
+    "Wanita (Sinta - Tegas & Formal)": {"pitch": 1.1, "rate": 1.05},
+    "Pria (Budi - Berat & Karismatik)": {"pitch": 0.7, "rate": 0.9},
+    "Pria (Rendi - Cepat & Energetik)": {"pitch": 0.85, "rate": 1.15}
+}
 
 # 3. Penggabungan Instruksi Karakter Utama (Karakter Pesanan Anda)
 sql_character_instruction = """
@@ -115,7 +135,7 @@ if reset_button:
 
 # 6. Tampilkan Welcome Message jika belum ada obrolan
 if len(st.session_state.messages) == 0:
-    st.chat_message("assistant").markdown("Halo! Saya adalah AI profesional database toko komputer Anda. Saya siap menganalisis skema, mengeksekusi perintah SQL secara aman, dan bersuara. Ada data yang ingin diperiksa?")
+    st.chat_message("assistant").markdown("Halo! Saya adalah AI profesional database toko komputer Anda. Silakan tentukan karakter suara pria/wanita pilihan Anda di sidebar, lalu mari kita mulai memeriksa data!")
 
 # 7. Tampilkan Riwayat Obrolan beserta Timestamp di Layar
 for msg in st.session_state.messages:
@@ -148,7 +168,7 @@ if prompt := st.chat_input("Ketik pertanyaan terkait database atau produk di sin
                     full_prompt += f"{msg['role']}: {msg['content']}\n"
                 full_prompt += "assistant: "
 
-                # Panggil model utama dengan karakter SQL dan Google Search terintegrasi
+                # Panggil model utama
                 response = client.models.generate_content(
                     model='gemini-2.5-flash',
                     contents=full_prompt,
@@ -177,15 +197,31 @@ if prompt := st.chat_input("Ketik pertanyaan terkait database atau produk di sin
                 # Simpan ke riwayat
                 st.session_state.messages.append({"role": "assistant", "content": response_text, "time": bot_time})
 
-                # FITUR MENARIK: Mengeluarkan Suara (Web Speech API)
+                # FITUR MENARIK: Mengeluarkan Suara Sesuai Pilihan (Pria/Wanita) via Web Speech API
                 if enable_voice:
-                    # Menghapus simbol markdown agar suara membaca dengan bersih
-                    clean_text = response_text.replace("*", "").replace("#", "").replace("`", "")
+                    # Menghapus simbol markdown agar tidak terbaca aneh oleh sistem suara
+                    clean_text = response_text.replace("*", "").replace("#", "").replace("`", "").replace("\n", " ")
+                    
+                    # Mengambil konfigurasi pitch dan rate berdasarkan pilihan di sidebar
+                    selected_pitch = voice_params[voice_character]["pitch"]
+                    selected_rate = voice_params[voice_character]["rate"]
                     
                     components_code = f"""
                     <script>
                     var msg = new SpeechSynthesisUtterance({repr(clean_text)});
-                    msg.lang = 'id-ID'; // Mengatur suara dalam bahasa Indonesia
+                    msg.lang = 'id-ID'; 
+                    msg.pitch = {selected_pitch}; // Mengatur frekuensi suara pria/wanita
+                    msg.rate = {selected_rate};   // Mengatur kecepatan bicara
+                    
+                    // Mencoba mencari profil suara lokal yang cocok di browser jika tersedia
+                    var voices = window.speechSynthesis.getVoices();
+                    for(var i = 0; i < voices.length; i++) {{
+                        if(voices[i].lang.indexOf('id') > -1) {{
+                            msg.voice = voices[i];
+                            break;
+                        }}
+                    }}
+                    
                     window.speechSynthesis.speak(msg);
                     </script>
                     """
