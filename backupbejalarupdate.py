@@ -1,101 +1,39 @@
 import streamlit as st
 from google import genai
 from google.genai import types
-from datetime import datetime
 import time
 
-# 1. Konfigurasi Halaman Utama
+# 1. Konfigurasi Halaman Utama 🚀
 st.set_page_config(page_title="Gemini SQL Chatbot Pro", page_icon="💻", layout="centered")
 
-# ==================== FITUR PREMIUM: VIDEO BACKGROUND PEMANDANGAN BERGERAK TRANSPARAN ====================
-# Menyisipkan video pemandangan alam bergerak (looping otomatis, tanpa suara, memenuhi layar, transparan)
+# ==================== FITUR PREMIUM: CUSTOM CSS BACKGROUND & JAM TERANG KONTRAS ====================
 st.markdown("""
-    <div class="video-bg-container">
-        <video autoplay loop muted playsinline class="video-bg">
-            <source src="https://assets.mixkit.co/videos/preview/mixkit-beautiful-sunset-over-the-sea-and-mountains-42247-large.mp4" type="video/mp4">
-        </video>
-        <div class="video-overlay"></div>
-    </div>
-    
     <style>
-    /* Mengunci posisi video sebagai background permanen */
-    .video-bg-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: -2;
-        overflow: hidden;
-    }
-    .video-bg {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    /* Lapisan overlay transparan agar kontras teks tetap tajam */
-    .video-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(15, 23, 42, 0.55); /* Warna gelap transparan */
-        z-index: -1;
-    }
-
-    /* Mengosongkan background asli Streamlit agar tembus pandang ke video */
+    /* 1. Mengembalikan Background Utama Aplikasi ke Gradasi Semula (Soft & Clean) 🎨 */
     .stApp {
-        background: transparent !important;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%) !important;
     }
     
-    /* Mengubah Desain Sidebar menjadi Efek Kaca (Glassmorphic Premium) */
+    /* 2. Mengubah Desain Sidebar menjadi Efek Kaca (Glassmorphic) 🔮 */
     [data-testid="stSidebar"] {
-        background-color: rgba(15, 23, 42, 0.4) !important;
-        backdrop-filter: blur(12px);
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.4) !important;
+        backdrop-filter: blur(10px);
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
     }
     
-    /* Membuat Balon Obrolan Berwarna Semi-Transparan (Kristal) */
-    [data-testid="stChatMessage"] {
-        background-color: rgba(255, 255, 255, 0.12) !important;
-        backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 15px;
-        padding: 15px;
-        margin-bottom: 15px;
-        color: #f8fafc !important; /* Mengubah teks chat menjadi putih cerah agar mudah dibaca */
-        animation: chatPopUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    
-    /* Memastikan teks input di bagian bawah tetap terlihat kontras */
-    [data-testid="stChatInput"] {
-        background-color: rgba(30, 41, 59, 0.8) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    }
-    
-    /* ANIMASI 1: Judul Melayang & Bergeser Warna */
+    /* 3. FITUR KEREN: Judul Bergerak Melayang & Berubah Warna 🌈 */
     @keyframes floatAndGlow {
         0% { transform: translateY(0px); background-position: 0% 50%; }
         50% { transform: translateY(-8px); background-position: 100% 50%; }
         100% { transform: translateY(0px); background-position: 0% 50%; }
     }
-    
-    /* ANIMASI 2: Gambar PC Berputar & Membesar Aktif */
-    @keyframes pcRotateBounce {
-        0% { transform: scale(1) rotate(0deg); }
-        25% { transform: scale(1.15) rotate(5deg); }
-        50% { transform: scale(1) rotate(-5deg); }
-        75% { transform: scale(1.15) rotate(3deg); }
-        100% { transform: scale(1) rotate(0deg); }
-    }
 
     .main-title {
-        font-size: 2.6rem;
+        font-size: 2.8rem;
         font-weight: 800;
         text-align: center;
         margin-bottom: 5px;
-        background: linear-gradient(270deg, #38bdf8, #c084fc, #60a5fa, #22d3ee);
+        background: linear-gradient(270deg, #2563eb, #9333ea, #3b82f6, #06b6d4);
         background-size: 400% 400%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -107,81 +45,90 @@ st.markdown("""
         animation: pcRotateBounce 3s ease-in-out infinite;
     }
     
+    @keyframes pcRotateBounce {
+        0% { transform: scale(1) rotate(0deg); }
+        25% { transform: scale(1.15) rotate(5deg); }
+        50% { transform: scale(1) rotate(-5deg); }
+        75% { transform: scale(1.15) rotate(3deg); }
+        100% { transform: scale(1) rotate(0deg); }
+    }
+    
     .subtitle {
         text-align: center;
-        color: #cbd5e1;
+        color: #64748b;
         font-size: 1rem;
         margin-bottom: 25px;
     }
     
-    /* ANIMASI 3: Balon Chat Muncul Bergerak */
+    /* 4. Animasi Bergerak Muncul pada Balon Chat 💬 */
     @keyframes chatPopUp {
-        0% { opacity: 0; transform: translateY(25px) scale(0.97); }
+        0% { opacity: 0; transform: translateY(20px) scale(0.98); }
         100% { opacity: 1; transform: translateY(0) scale(1); }
     }
+
+    [data-testid="stChatMessage"] {
+        animation: chatPopUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
     
-    /* ANIMASI 4: Efek Bernapas (Breathing) Aktif untuk Avatar Karakter */
+    /* 5. Kustomisasi & Animasi Karakter Avatar (User & Bot) 🧑‍💻 */
     @keyframes avatarBreath {
         0% { transform: translateY(0px); }
         50% { transform: translateY(-4px); }
         100% { transform: translateY(0px); }
     }
 
-    /* Kustomisasi Ikon Avatar User (Pria Keren 3D) */
     [data-testid="stChatMessage"] img[src*="user"] {
         content: url("https://cdn-icons-png.flaticon.com/512/4140/4140037.png") !important;
         border-radius: 50%;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
         animation: avatarBreath 3s ease-in-out infinite;
-        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     
-    /* Kustomisasi Ikon Avatar Assistant (Robot AI Hologram) */
     [data-testid="stChatMessage"] img[src*="assistant"] {
         content: url("https://cdn-icons-png.flaticon.com/512/8943/8943377.png") !important;
         border-radius: 50%;
-        box-shadow: 0px 4px 12px rgba(56, 189, 248, 0.4);
+        box-shadow: 0px 4px 10px rgba(37, 99, 235, 0.3);
         animation: avatarBreath 3s ease-in-out infinite;
         animation-delay: 1.5s;
-        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    /* Efek bergerak aktif berputar saat avatar disentuh kursor */
     [data-testid="stChatMessage"]:hover img {
         transform: scale(1.25) rotate(12deg);
+        transition: transform 0.4s ease;
     }
     
-    /* Gaya Teks Waktu (Timestamp) */
+    /* 6. FITUR BARU: Mengubah Warna Jam Menjadi Sangat Terang & Jelas Kontras ⏰ */
     .time-text {
-        font-size: 0.75rem;
-        color: #94a3b8;
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #ffffff !important; /* Warna teks putih cerah bersih */
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); /* Latar belakang biru terang kontras */
+        padding: 3px 8px;
+        border-radius: 6px;
+        display: inline-block;
         margin-top: 5px;
         margin-bottom: 5px;
-    }
-    
-    /* Memastikan teks teks biasa di dalam markdown berwarna putih */
-    [data-testid="stChatMessage"] p {
-        color: #f1f5f9 !important;
+        box-shadow: 0px 2px 6px rgba(59, 130, 246, 0.4); /* Efek cahaya neon mini */
     }
     </style>
 """, unsafe_allow_html=True)
 # ==============================================================================
 
-# Menampilkan Judul Dinamis dengan Gambar PC yang bergerak aktif
+# Menampilkan Judul Dinamis 🌟
 st.markdown('<div class="main-title"><span class="moving-pc">💻</span> Gemini SQL Chatbot Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Database Agent • Live Sunset Video Background • 10 Suara Realistis</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Database Agent • Tampilan Clean • Petunjuk Jam Terang Kontras • Kaya Emotikon ✨</div>', unsafe_allow_html=True)
 
-# 2. Sidebar Pengaturan
+# 2. Sidebar Pengaturan ⚙️
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/6125/6125643.png", width=80) 
-    st.subheader("Panel Kontrol")
+    st.subheader("Panel Kontrol 🛠️")
     google_api_key = st.text_input("Google AI API Key", type="password", placeholder="Masukkan API Key Anda...")
     
     st.markdown("---")
     st.subheader("🔊 Opsi Suara Realistis")
     enable_voice = st.checkbox("Aktifkan Suara Bot (Auto-Speak)", value=False)
     
-    # FITUR 10 KARAKTER SUARA REALISTIS (5 PRIA & 5 WANITA)
+    # 10 Pilihan Profil Suara 🗣️
     voice_character = st.selectbox(
         "Pilih Agen Suara Realistis:",
         [
@@ -201,7 +148,7 @@ with st.sidebar:
     st.markdown("---")
     reset_button = st.button("🔄 Reset Percakapan", use_container_width=True)
 
-# Parameter fine-tuning suara manusia asli
+# Parameter fine-tuning suara manusia asli 🎯
 voice_params = {
     "👩 Sari (Suara Utama - Lembut & Natural)":     {"pitch": 1.15, "rate": 0.98},
     "👩 Dian (Eksekutif - Formal & Profesional)":   {"pitch": 1.05, "rate": 1.02},
@@ -215,10 +162,13 @@ voice_params = {
     "👨 Fajar (Gaya Santai - Casual & Friendly)":    {"pitch": 0.85, "rate": 1.02}
 }
 
-# 3. Penggabungan Instruksi Karakter Utama (Aturan SQL Ketat)
+# 3. Penggabungan Aturan SQL Ketat & Instruksi Tambahan Emotikon 📝
 sql_character_instruction = """
 You are a smart and professional AI assistant specializing in querying a computer store's SQL database to answer user questions.
 You have access to tools for inspecting the database schema and executing SQL queries.
+
+[EMOJI RULE]
+- ALWAYS add highly relevant and vibrant emojis to sentences or words when explaining interesting facts, numbers, or data findings to make it super engaging!
 
 [WORKFLOW]
 Follow this workflow EXACTLY:
@@ -248,40 +198,43 @@ Follow this workflow EXACTLY:
 Jawablah menggunakan data paling valid dan terbaru dari Google Search jika diperlukan, namun tetap patuhi aturan struktur di atas.
 """
 
-# 4. Validasi API Key
+# 4. Validasi API Key 🔑
 if not google_api_key:
     st.info("🔑 Silakan masukkan Google AI API Key Anda di menu sidebar untuk memulai.")
     st.stop()
 
-# 5. Simpan Riwayat Pesan
+# 5. Simpan Riwayat Pesan 📦
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Tombol Reset Percakapan
+# Tombol Reset Percakapan 🔄
 if reset_button:
     st.session_state.messages = []
     st.rerun()
 
-# 6. Tampilkan Welcome Message jika belum ada obrolan
+# 6. Tampilkan Welcome Message 👋
 if len(st.session_state.messages) == 0:
-    st.chat_message("assistant").markdown("Halo! Saya adalah AI profesional database toko komputer Anda. Layar latar belakang aplikasi ini sekarang telah menggunakan pemandangan laut senja bergerak yang elegan dan transparan. Silakan berikan pertanyaan data Anda.")
+    # Mengambil waktu lokal perangkat saat pertama kali memuat halaman
+    local_time = time.strftime("%H:%M")
+    st.chat_message("assistant").markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Background saya sudah kembali bersih, indikator waktu disetel sangat terang kontras ⏰, dan saya siap menghias jawaban menarik dengan emotikon seru! ✨")
 
-# 7. Tampilkan Riwayat Obrolan beserta Timestamp di Layar
+# 7. Tampilkan Riwayat Obrolan beserta Timestamp Jelas di Layar 🕒
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
-        st.markdown(f'<div class="time-text">{msg["time"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="time-text">⏰ {msg["time"]}</div>', unsafe_allow_html=True)
 
-# 8. Proses Input Pesan Baru dari User
-if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di sini..."):
-    current_time = datetime.now().strftime("%H:%M")
+# 8. Proses Input Pesan Baru dari User 🗣️
+if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di sini... 💬"):
+    # Deteksi waktu real-time berdasarkan zona waktu daerah pengguna saat ini
+    current_time = time.strftime("%H:%M")
     
     st.session_state.messages.append({"role": "user", "content": prompt, "time": current_time})
     with st.chat_message("user"):
         st.markdown(prompt)
-        st.markdown(f'<div class="time-text">{current_time}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="time-text">⏰ {current_time}</div>', unsafe_allow_html=True)
 
-    # Tampilkan respon dari Gemini
+    # Tampilkan respon dari Gemini 🤖
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
@@ -305,7 +258,7 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di s
 
                 response_text = response.text
 
-                # Animasi Mengetik (Typing Effect)
+                # Animasi Mengetik (Typing Effect) ⚡
                 displayed_text = ""
                 for char in response_text:
                     displayed_text += char
@@ -314,12 +267,13 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di s
                 
                 message_placeholder.markdown(response_text)
                 
-                bot_time = datetime.now().strftime("%H:%M")
-                st.markdown(f'<div class="time-text">{bot_time}</div>', unsafe_allow_html=True)
+                # Deteksi waktu kirim bot secara real-time berdasarkan daerah saat ini
+                bot_time = time.strftime("%H:%M")
+                st.markdown(f'<div class="time-text">⏰ {bot_time}</div>', unsafe_allow_html=True)
                 
                 st.session_state.messages.append({"role": "assistant", "content": response_text, "time": bot_time})
 
-                # FITUR SUARA REALISTIS (10 Karakter Pria/Wanita via Web Speech API)
+                # FITUR SUARA REALISTIS 🎵
                 if enable_voice:
                     clean_text = response_text.replace("*", "").replace("#", "").replace("`", "").replace("\n", " ")
                     selected_pitch = voice_params[voice_character]["pitch"]
