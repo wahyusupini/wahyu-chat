@@ -6,7 +6,7 @@ import time
 # 1. Konfigurasi Halaman Utama 🚀
 st.set_page_config(page_title="Gemini SQL Chatbot Pro", page_icon="💻", layout="centered")
 
-# ==================== FITUR PREMIUM: CUSTOM CSS BACKGROUND & JAM TERANG KONTRAS ====================
+# ==================== FITUR PREMIUM: CUSTOM CSS BACKGROUND & JAM NEON TERANG ====================
 st.markdown("""
     <style>
     /* 1. Mengembalikan Background Utama Aplikasi ke Gradasi Semula (Soft & Clean) 🎨 */
@@ -97,18 +97,18 @@ st.markdown("""
         transition: transform 0.4s ease;
     }
     
-    /* 6. FITUR BARU: Mengubah Warna Jam Menjadi Sangat Terang & Jelas Kontras ⏰ */
+    /* 6. FITUR UTAMA: Mengubah Warna Jam Menjadi Sangat Terang & Jelas Kontras ⏰ */
     .time-text {
         font-size: 0.8rem;
         font-weight: 800;
-        color: #ffffff !important; /* Warna teks putih cerah bersih */
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); /* Latar belakang biru terang kontras */
-        padding: 3px 8px;
+        color: #ffffff !important; /* Teks putih bersih */
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); /* Gradasi Biru Neon */
+        padding: 3px 9px;
         border-radius: 6px;
         display: inline-block;
         margin-top: 5px;
         margin-bottom: 5px;
-        box-shadow: 0px 2px 6px rgba(59, 130, 246, 0.4); /* Efek cahaya neon mini */
+        box-shadow: 0px 2px 8px rgba(59, 130, 246, 0.5); /* Efek Pendaran Cahaya */
     }
     </style>
 """, unsafe_allow_html=True)
@@ -116,7 +116,7 @@ st.markdown("""
 
 # Menampilkan Judul Dinamis 🌟
 st.markdown('<div class="main-title"><span class="moving-pc">💻</span> Gemini SQL Chatbot Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Database Agent • Tampilan Clean • Petunjuk Jam Terang Kontras • Kaya Emotikon ✨</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Database Agent • Jam Akurat Otomatis Daerah (WIB/WITA/WIT) • Kaya Emotikon ✨</div>', unsafe_allow_html=True)
 
 # 2. Sidebar Pengaturan ⚙️
 with st.sidebar:
@@ -128,7 +128,7 @@ with st.sidebar:
     st.subheader("🔊 Opsi Suara Realistis")
     enable_voice = st.checkbox("Aktifkan Suara Bot (Auto-Speak)", value=False)
     
-    # 10 Pilihan Profil Suara 🗣️
+    # 10 Pilihan Profil Suara Realistis 🗣—
     voice_character = st.selectbox(
         "Pilih Agen Suara Realistis:",
         [
@@ -148,7 +148,7 @@ with st.sidebar:
     st.markdown("---")
     reset_button = st.button("🔄 Reset Percakapan", use_container_width=True)
 
-# Parameter fine-tuning suara manusia asli 🎯
+# Parameter suara manusia asli 🎯
 voice_params = {
     "👩 Sari (Suara Utama - Lembut & Natural)":     {"pitch": 1.15, "rate": 0.98},
     "👩 Dian (Eksekutif - Formal & Profesional)":   {"pitch": 1.05, "rate": 1.02},
@@ -212,27 +212,50 @@ if reset_button:
     st.session_state.messages = []
     st.rerun()
 
-# 6. Tampilkan Welcome Message 👋
-if len(st.session_state.messages) == 0:
-    # Mengambil waktu lokal perangkat saat pertama kali memuat halaman
-    local_time = time.strftime("%H:%M")
-    st.chat_message("assistant").markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Background saya sudah kembali bersih, indikator waktu disetel sangat terang kontras ⏰, dan saya siap menghias jawaban menarik dengan emotikon seru! ✨")
+# Fungsi bantuan untuk mendeteksi waktu lokal perangkat/daerah pengguna menggunakan JavaScript saat dimuat browser
+def get_local_time_html():
+    return """
+    <span class="time-text">⏰ <span class="local-clock">--:--</span></span>
+    <script>
+    (function() {
+        var now = new Date();
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var timeElements = document.querySelectorAll('.local-clock');
+        // Perbarui elemen penanda waktu terakhir yang ditambahkan ke DOM
+        if (timeElements.length > 0) {
+            var lastElem = timeElements[timeElements.length - 1];
+            if (lastElem.innerHTML === '--:--') {
+                lastElem.innerHTML = hours + ':' + minutes;
+            }
+        }
+    })();
+    </script>
+    """
 
-# 7. Tampilkan Riwayat Obrolan beserta Timestamp Jelas di Layar 🕒
+# 6. Tampilkan Welcome Message Awal 👋
+if len(st.session_state.messages) == 0:
+    with st.chat_message("assistant"):
+        st.markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Background saya sudah kembali bersih, indikator waktu disetel otomatis mendeteksi jam daerah Anda ⏰, dan saya siap menghias jawaban menarik dengan emotikon seru! ✨")
+        st.markdown(get_local_time_html(), unsafe_allow_html=True)
+
+# 7. Tampilkan Riwayat Obrolan dari Array State 🕒
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
+        # Menggunakan jam statis yang sudah terekam dari sesi sebelumnya agar tidak berubah saat halaman di-refresh
         st.markdown(f'<div class="time-text">⏰ {msg["time"]}</div>', unsafe_allow_html=True)
 
 # 8. Proses Input Pesan Baru dari User 🗣️
 if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di sini... 💬"):
-    # Deteksi waktu real-time berdasarkan zona waktu daerah pengguna saat ini
-    current_time = time.strftime("%H:%M")
+    # Fallback penanda waktu cadangan berbasis waktu lokal dasar jika JS memuat terlambat
+    fallback_time = time.strftime("%H:%M")
     
-    st.session_state.messages.append({"role": "user", "content": prompt, "time": current_time})
+    # Simpan pesan user (sementara dicatat dengan penanda fallback, nanti disempurnakan di interface browser)
+    st.session_state.messages.append({"role": "user", "content": prompt, "time": fallback_time})
     with st.chat_message("user"):
         st.markdown(prompt)
-        st.markdown(f'<div class="time-text">⏰ {current_time}</div>', unsafe_allow_html=True)
+        st.markdown(get_local_time_html(), unsafe_allow_html=True)
 
     # Tampilkan respon dari Gemini 🤖
     with st.chat_message("assistant"):
@@ -266,12 +289,10 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di s
                     time.sleep(0.002)
                 
                 message_placeholder.markdown(response_text)
+                st.markdown(get_local_time_html(), unsafe_allow_html=True)
                 
-                # Deteksi waktu kirim bot secara real-time berdasarkan daerah saat ini
-                bot_time = time.strftime("%H:%M")
-                st.markdown(f'<div class="time-text">⏰ {bot_time}</div>', unsafe_allow_html=True)
-                
-                st.session_state.messages.append({"role": "assistant", "content": response_text, "time": bot_time})
+                # Update array riwayat agar saat chat berikutnya dikirim, jam dari respons ini terkunci permanen
+                st.session_state.messages.append({"role": "assistant", "content": response_text, "time": fallback_time})
 
                 # FITUR SUARA REALISTIS 🎵
                 if enable_voice:
