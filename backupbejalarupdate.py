@@ -7,29 +7,39 @@ import time
 # 1. Konfigurasi Halaman Utama
 st.set_page_config(page_title="Gemini SQL Chatbot Pro", page_icon="💻", layout="centered")
 
-# ==================== FITUR PREMIUM: CSS ANIMASI PC, CHAT & AVATAR HIDUP ====================
+# ==================== FITUR PREMIUM: CSS ANIMASI AKTIF & AVATAR HIDUP ====================
 st.markdown("""
     <style>
-    /* 1. Background Utama */
+    /* Background Utama Aplikasi (Gradasi Warna Soft) */
     .stApp {
         background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
     }
     
-    /* 2. Sidebar Glassmorphic */
+    /* Desain Sidebar Efek Kaca (Glassmorphic) */
     [data-testid="stSidebar"] {
         background-color: rgba(255, 255, 255, 0.4) !important;
         backdrop-filter: blur(10px);
         border-right: 1px solid rgba(255, 255, 255, 0.2);
     }
     
-    /* 3. Animasi Judul Melayang & Bergeser Warna */
+    /* ANIMASI 1: Judul Melayang & Bergeser Warna */
     @keyframes floatAndGlow {
         0% { transform: translateY(0px); background-position: 0% 50%; }
         50% { transform: translateY(-8px); background-position: 100% 50%; }
         100% { transform: translateY(0px); background-position: 0% 50%; }
     }
+    
+    /* ANIMASI 2: Gambar PC Berputar & Membesar Aktif */
+    @keyframes pcRotateBounce {
+        0% { transform: scale(1) rotate(0deg); }
+        25% { transform: scale(1.15) rotate(5deg); }
+        50% { transform: scale(1) rotate(-5deg); }
+        75% { transform: scale(1.15) rotate(3deg); }
+        100% { transform: scale(1) rotate(0deg); }
+    }
+
     .main-title {
-        font-size: 2.8rem;
+        font-size: 2.6rem;
         font-weight: 800;
         text-align: center;
         margin-bottom: 5px;
@@ -39,57 +49,62 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
         animation: floatAndGlow 4s ease-in-out infinite;
     }
+    
+    /* Menerapkan animasi aktif khusus pada gambar/ikon PC di judul */
+    .moving-pc {
+        display: inline-block;
+        animation: pcRotateBounce 3s ease-in-out infinite;
+    }
+    
     .subtitle {
         text-align: center;
         color: #64748b;
         font-size: 1rem;
-        margin-bottom: 15px;
-    }
-    
-    /* 4. FITUR BARU: Gambar PC Bergerak Aktif (Spin, Float, & Pulse) */
-    @keyframes pcActiveAnimation {
-        0% { transform: translateY(0px) rotate(0deg) scale(1); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-        25% { transform: translateY(-6px) rotate(2deg) scale(1.03); filter: drop-shadow(0 15px 20px rgba(37,99,235,0.2)); }
-        50% { transform: translateY(0px) rotate(0deg) scale(1); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-        75% { transform: translateY(-6px) rotate(-2deg) scale(1.03); filter: drop-shadow(0 15px 20px rgba(147,51,234,0.2)); }
-        100% { transform: translateY(0px) rotate(0deg) scale(1); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
-    }
-    .pc-container {
-        display: flex;
-        justify-content: center;
         margin-bottom: 25px;
     }
-    .pc-image {
-        width: 110px;
-        animation: pcActiveAnimation 5s ease-in-out infinite;
-    }
     
-    /* 5. Animasi Bergerak Muncul pada Balon Chat */
+    /* ANIMASI 3: Balon Chat Muncul Bergerak */
     @keyframes chatPopUp {
-        0% { opacity: 0; transform: translateY(20px) scale(0.98); }
+        0% { opacity: 0; transform: translateY(25px) scale(0.97); }
         100% { opacity: 1; transform: translateY(0) scale(1); }
     }
+
     [data-testid="stChatMessage"] {
         animation: chatPopUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     
-    /* 6. Animasi Karakter Avatar Lebih Hidup */
+    /* ANIMASI 4: Efek Bernapas (Breathing) Aktif untuk Avatar Karakter */
+    @keyframes avatarBreath {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-4px); }
+        100% { transform: translateY(0px); }
+    }
+
+    /* Kustomisasi Ikon Avatar User (Pria Keren 3D) */
     [data-testid="stChatMessage"] img[src*="user"] {
         content: url("https://cdn-icons-png.flaticon.com/512/4140/4140037.png") !important;
         border-radius: 50%;
         box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
-        transition: all 0.3s ease-in-out;
+        animation: avatarBreath 3s ease-in-out infinite;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+    
+    /* Kustomisasi Ikon Avatar Assistant (Robot AI Hologram) */
     [data-testid="stChatMessage"] img[src*="assistant"] {
         content: url("https://cdn-icons-png.flaticon.com/512/8943/8943377.png") !important;
         border-radius: 50%;
-        box-shadow: 0px 4px 10px rgba(37, 99, 235, 0.3);
-        transition: all 0.3s ease-in-out;
+        box-shadow: 0px 4px 12px rgba(37, 99, 235, 0.3);
+        animation: avatarBreath 3s ease-in-out infinite;
+        animation-delay: 1.5s; /* Bergantian bernapas dengan user */
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+
+    /* Efek bergerak aktif berputar saat avatar disentuh kursor */
     [data-testid="stChatMessage"]:hover img {
-        transform: scale(1.2) rotate(8deg);
+        transform: scale(1.25) rotate(12deg);
     }
     
+    /* Gaya Teks Waktu (Timestamp) */
     .time-text {
         font-size: 0.75rem;
         color: #94a3b8;
@@ -100,16 +115,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 # ==============================================================================
 
-# Menampilkan Judul & Elemen PC Bergerak Aktif
-st.markdown('<div class="main-title">💻 Gemini SQL Chatbot Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Database Agent • 20 Real Voices • Efek Visual Aktif Bergerak</div>', unsafe_allow_html=True)
-
-# Memunculkan gambar PC Animasi Bergerak Aktif di halaman utama
-st.markdown("""
-    <div class="pc-container">
-        <img class="pc-image" src="https://cdn-icons-png.flaticon.com/512/2004/2004699.png" alt="PC Gaming 3D">
-    </div>
-""", unsafe_allow_html=True)
+# Menampilkan Judul Dinamis dengan Gambar PC yang bergerak aktif
+st.markdown('<div class="main-title"><span class="moving-pc">💻</span> Gemini SQL Chatbot Pro</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Database Agent • Ikon PC Aktif • 10 Karakter Suara Realistis Hidup</div>', unsafe_allow_html=True)
 
 # 2. Sidebar Pengaturan
 with st.sidebar:
@@ -118,61 +126,41 @@ with st.sidebar:
     google_api_key = st.text_input("Google AI API Key", type="password", placeholder="Masukkan API Key Anda...")
     
     st.markdown("---")
-    st.subheader("🔊 Pengaturan Suara Realistis")
+    st.subheader("🔊 Opsi Suara Realistis")
     enable_voice = st.checkbox("Aktifkan Suara Bot (Auto-Speak)", value=False)
     
-    # FITUR BARU: Dropdown 20 Karakter Suara Realistis (10 Pria & 10 Wanita)
+    # FITUR 10 KARAKTER SUARA REALISTIS (5 PRIA & 5 WANITA)
     voice_character = st.selectbox(
-        "Pilih Profil Suara Manusia Real:",
+        "Pilih Agen Suara Realistis:",
         [
-            "👩 1. Sari (Customer Service - Ramah & Lembut)",
-            "👩 2. Sinta (Penyiar Berita - Formal & Tegas)",
-            "👩 3. Amanda (Gamer Girl - Ceria & Cepat)",
-            "👩 4. Citra (Eksekutif Kantor - Tenang & Berwibawa)",
-            "👩 5. Dian (Gadis Remaja - Santai & Gaul)",
-            "👩 6. Ratu (Kasir Toko - Cepat & Sigap)",
-            "👩 7. Maya (Dosen Tekno - Jelas & Edukatif)",
-            "👩 8. Bella (Resepsionis - Manis & Sopan)",
-            "👩 9. Indah (Podcaster - Hangat & Berenergi)",
-            "👩 10. Fitri (Asisten Bisnis - Presisi & Profesional)",
-            "👨 11. Budi (Manager Toko - Berat & Karismatik)",
-            "👨 12. Rendi (Tech Reviewer - Cepat & Antusias)",
-            "👨 13. Adi (Penyiar Radio - Renyah & Ramah)",
-            "👨 14. Gunawan (Direktur Senior - Lambat & Tegas)",
-            "👨 15. Kevin (Gamers Pro - Santai & Energetik)",
-            "👨 16. Doni (Sales Promotor - Semangat & Nyaring)",
-            "👨 17. Eko (Guru Komputer - Sabar & Tertata)",
-            "👨 18. Fajar (Anak Senja - Tenang & Melow)",
-            "👨 19. Hendra (Analis Data - Monoton & Serius)",
-            "👨 20. Yusuf (Ustadz/Motivator - Teduh & Kalem)"
+            "👩 Sari (Suara Utama - Lembut & Natural)",
+            "👩 Dian (Eksekutif - Formal & Profesional)",
+            "👩 Nadia (Customer Service - Ramah & Cepat)",
+            "👩 Amalia (Presenter - Jelas & Berirama)",
+            "👩 Citra (Gaya Santai - Akrab & Logat Kota)",
+            "👨 Budi (Suara Utama - Berat & Karismatik)",
+            "👨 Andika (Narator - Tegas & Berwibawa)",
+            "👨 Rendi (Teknisi Toko - Cepat & Energetik)",
+            "👨 Gunawan (Manajer - Tenang & Bijaksana)",
+            "👨 Fajar (Gaya Santai - Casual & Friendly)"
         ]
     )
     
     st.markdown("---")
     reset_button = st.button("🔄 Reset Percakapan", use_container_width=True)
 
-# Pemetaan konfigurasi parameter 20 suara (pitch & rate) untuk manipulasi Web Speech API
+# Parameter fine-tuning suara manusia asli menggunakan manipulasi Web Audio API (Pitch & Rate)
 voice_params = {
-    "👩 1. Sari (Customer Service - Ramah & Lembut)": {"pitch": 1.2, "rate": 0.95},
-    "👩 2. Sinta (Penyiar Berita - Formal & Tegas)": {"pitch": 1.0, "rate": 1.1},
-    "👩 3. Amanda (Gamer Girl - Ceria & Cepat)": {"pitch": 1.3, "rate": 1.2},
-    "👩 4. Citra (Eksekutif Kantor - Tenang & Berwibawa)": {"pitch": 1.1, "rate": 0.9},
-    "👩 5. Dian (Gadis Remaja - Santai & Gaul)": {"pitch": 1.25, "rate": 1.05},
-    "👩 6. Ratu (Kasir Toko - Cepat & Sigap)": {"pitch": 1.15, "rate": 1.25},
-    "👩 7. Maya (Dosen Tekno - Jelas & Edukatif)": {"pitch": 1.05, "rate": 0.95},
-    "👩 8. Bella (Resepsionis - Manis & Sopan)": {"pitch": 1.2, "rate": 0.9},
-    "👩 9. Indah (Podcaster - Hangat & Berenergi)": {"pitch": 1.15, "rate": 1.15},
-    "👩 10. Fitri (Asisten Bisnis - Presisi & Profesional)": {"pitch": 1.1, "rate": 1.0},
-    "👨 11. Budi (Manager Toko - Berat & Karismatik)": {"pitch": 0.65, "rate": 0.9},
-    "👨 12. Rendi (Tech Reviewer - Cepat & Antusias)": {"pitch": 0.85, "rate": 1.2},
-    "👨 13. Adi (Penyiar Radio - Renyah & Ramah)": {"pitch": 0.9, "rate": 1.05},
-    "👨 14. Gunawan (Direktur Senior - Lambat & Tegas)": {"pitch": 0.7, "rate": 0.8},
-    "👨 15. Kevin (Gamers Pro - Santai & Energetik)": {"pitch": 0.8, "rate": 1.15},
-    "👨 16. Doni (Sales Promotor - Semangat & Nyaring)": {"pitch": 0.95, "rate": 1.3},
-    "👨 17. Eko (Guru Komputer - Sabar & Tertata)": {"pitch": 0.85, "rate": 0.95},
-    "👨 18. Fajar (Anak Senja - Tenang & Melow)": {"pitch": 0.75, "rate": 0.85},
-    "👨 19. Hendra (Analis Data - Monoton & Serius)": {"pitch": 0.8, "rate": 0.95},
-    "👨 20. Yusuf (Ustadz/Motivator - Teduh & Kalem)": {"pitch": 0.7, "rate": 0.85}
+    "👩 Sari (Suara Utama - Lembut & Natural)":     {"pitch": 1.15, "rate": 0.98},
+    "👩 Dian (Eksekutif - Formal & Profesional)":   {"pitch": 1.05, "rate": 1.02},
+    "👩 Nadia (Customer Service - Ramah & Cepat)":  {"pitch": 1.25, "rate": 1.12},
+    "👩 Amalia (Presenter - Jelas & Berirama)":     {"pitch": 1.10, "rate": 1.00},
+    "👩 Citra (Gaya Santai - Akrab & Logat Kota)":  {"pitch": 1.20, "rate": 1.05},
+    "👨 Budi (Suara Utama - Berat & Karismatik)":   {"pitch": 0.72, "rate": 0.92},
+    "👨 Andika (Narator - Tegas & Berwibawa)":       {"pitch": 0.65, "rate": 0.98},
+    "👨 Rendi (Teknisi Toko - Cepat & Energetik)":   {"pitch": 0.88, "rate": 1.15},
+    "👨 Gunawan (Manajer - Tenang & Bijaksana)":     {"pitch": 0.78, "rate": 0.90},
+    "👨 Fajar (Gaya Santai - Casual & Friendly)":    {"pitch": 0.85, "rate": 1.02}
 }
 
 # 3. Penggabungan Instruksi Karakter Utama (Aturan SQL Ketat)
@@ -217,22 +205,23 @@ if not google_api_key:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Tombol Reset Percakapan
 if reset_button:
     st.session_state.messages = []
     st.rerun()
 
-# 6. Welcome Message
+# 6. Tampilkan Welcome Message jika belum ada obrolan
 if len(st.session_state.messages) == 0:
-    st.chat_message("assistant").markdown("Halo! Saya adalah AI profesional database toko komputer Anda. Desain grafis PC di atas bergerak aktif dan kini saya dilengkapi dengan **20 pilihan warna suara pria & wanita** yang sangat mirip dengan karakter asli di kehidupan nyata. Silakan berikan pertanyaan Anda!")
+    st.chat_message("assistant").markdown("Halo! Saya adalah AI profesional database toko komputer Anda. Ikon komputer di judul saya sekarang bergerak aktif, dan karakter avatar kita memiliki efek animasi bernapas yang dinamis! Silakan tentukan 1 dari 10 opsi suara realistis pilihan Anda di sidebar.")
 
-# 7. Tampilkan Riwayat Obrolan
+# 7. Tampilkan Riwayat Obrolan beserta Timestamp di Layar
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
         st.markdown(f'<div class="time-text">{msg["time"]}</div>', unsafe_allow_html=True)
 
-# 8. Input Chat Baru
-if prompt := st.chat_input("Ketik pertanyaan seputar database di sini..."):
+# 8. Proses Input Pesan Baru dari User
+if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di sini..."):
     current_time = datetime.now().strftime("%H:%M")
     
     st.session_state.messages.append({"role": "user", "content": prompt, "time": current_time})
@@ -240,10 +229,11 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database di sini..."):
         st.markdown(prompt)
         st.markdown(f'<div class="time-text">{current_time}</div>', unsafe_allow_html=True)
 
+    # Tampilkan respon dari Gemini
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
-        with st.spinner("🔍 Menganalisis alur kerja SQL & merumuskan jawaban terbaik..."):
+        with st.spinner("🔍 Memeriksa alur kerja SQL & merumuskan jawaban terbaik..."):
             try:
                 client = genai.Client(api_key=google_api_key)
 
@@ -263,7 +253,7 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database di sini..."):
 
                 response_text = response.text
 
-                # Typing Effect
+                # Animasi Mengetik (Typing Effect)
                 displayed_text = ""
                 for char in response_text:
                     displayed_text += char
@@ -274,9 +264,10 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database di sini..."):
                 
                 bot_time = datetime.now().strftime("%H:%M")
                 st.markdown(f'<div class="time-text">{bot_time}</div>', unsafe_allow_html=True)
+                
                 st.session_state.messages.append({"role": "assistant", "content": response_text, "time": bot_time})
 
-                # FITUR MENGELUARKAN SUARA (20 KARAKTER REALISTIS)
+                # FITUR SUARA REALISTIS (10 Karakter Pria/Wanita via Web Speech API)
                 if enable_voice:
                     clean_text = response_text.replace("*", "").replace("#", "").replace("`", "").replace("\n", " ")
                     selected_pitch = voice_params[voice_character]["pitch"]
@@ -290,8 +281,9 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database di sini..."):
                     msg.rate = {selected_rate};   
                     
                     var voices = window.speechSynthesis.getVoices();
+                    // Prioritaskan mencari engine suara natural bahasa Indonesia bawaan perangkat
                     for(var i = 0; i < voices.length; i++) {{
-                        if(voices[i].lang.indexOf('id') > -1) {{
+                        if(voices[i].lang.indexOf('id') > -1 || voices[i].name.toLowerCase().includes('indonesia')) {{
                             msg.voice = voices[i];
                             break;
                         }}
