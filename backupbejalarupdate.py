@@ -7,7 +7,7 @@ import time
 # 1. Konfigurasi Halaman Utama
 st.set_page_config(page_title="Gemini SQL Chatbot Pro", page_icon="💻", layout="centered")
 
-# ==================== FITUR MENARIK: CUSTOM CSS BACKGROUND & ANIMASI BERGERAK ====================
+# ==================== FITUR MENARIK: CUSTOM CSS BACKGROUND & ANIMASI DINAMIS ====================
 st.markdown("""
     <style>
     /* 1. Mengubah Background Utama Aplikasi (Gradasi Warna Soft) */
@@ -22,20 +22,11 @@ st.markdown("""
         border-right: 1px solid rgba(255, 255, 255, 0.2);
     }
     
-    /* 3. FITUR KEREN: Judul Bergerak & Berubah Warna Otomatis */
+    /* 3. FITUR KEREN: Judul Bergerak Melayang & Berubah Warna */
     @keyframes floatAndGlow {
-        0% {
-            transform: translateY(0px);
-            background-position: 0% 50%;
-        }
-        50% {
-            transform: translateY(-8px); /* Efek bergerak melayang ke atas */
-            background-position: 100% 50%; /* Efek gradasi warna bergeser */
-        }
-        100% {
-            transform: translateY(0px);
-            background-position: 0% 50%;
-        }
+        0% { transform: translateY(0px); background-position: 0% 50%; }
+        50% { transform: translateY(-8px); background-position: 100% 50%; }
+        100% { transform: translateY(0px); background-position: 0% 50%; }
     }
 
     .main-title {
@@ -43,14 +34,10 @@ st.markdown("""
         font-weight: 800;
         text-align: center;
         margin-bottom: 5px;
-        
-        /* Membuat teks berwarna gradasi */
         background: linear-gradient(270deg, #2563eb, #9333ea, #3b82f6, #06b6d4);
         background-size: 400% 400%;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        
-        /* Menjalankan animasi bergerak setiap 4 detik secara berulang */
         animation: floatAndGlow 4s ease-in-out infinite;
     }
     
@@ -61,7 +48,30 @@ st.markdown("""
         margin-bottom: 25px;
     }
     
-    /* 4. Gaya Teks Waktu (Timestamp) */
+    /* 4. FITUR BARU: Animasi Bergerak Muncul pada Balon Chat & Karater (Avatar) */
+    @keyframes chatPopUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* Menerapkan efek bergerak halus pada setiap elemen chat di halaman */
+    [data-testid="stChatMessage"] {
+        animation: chatPopUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    /* Efek sedikit interaktif saat kursor menyentuh balon chat */
+    [data-testid="stChatMessage"]:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s ease;
+    }
+    
+    /* 5. Gaya Teks Waktu (Timestamp) */
     .time-text {
         font-size: 0.75rem;
         color: #94a3b8;
@@ -72,9 +82,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 # ==============================================================================
 
-# Menampilkan Judul dengan Gaya Animasi Baru
+# Menampilkan Judul Dinamis
 st.markdown('<div class="main-title">💻 Gemini SQL Chatbot Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Asisten Database Interaktif • Judul Animasi • Pilihan Suara Pria/Wanita</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Database Agent • Animasi Obrolan Bergerak • Suara Pria/Wanita</div>', unsafe_allow_html=True)
 
 # 2. Sidebar Pengaturan
 with st.sidebar:
@@ -100,7 +110,7 @@ with st.sidebar:
     st.markdown("---")
     reset_button = st.button("🔄 Reset Percakapan", use_container_width=True)
 
-# Pengaturan parameter suara berdasarkan pilihan karakter
+# Pengaturan parameter pitch & rate suara
 voice_params = {
     "Wanita (Sari - Lembut & Ramah)": {"pitch": 1.2, "rate": 0.95},
     "Wanita (Sinta - Tegas & Formal)": {"pitch": 1.1, "rate": 1.05},
@@ -108,7 +118,7 @@ voice_params = {
     "Pria (Rendi - Cepat & Energetik)": {"pitch": 0.85, "rate": 1.15}
 }
 
-# 3. Penggabungan Instruksi Karakter Utama (Karakter Pesanan Anda)
+# 3. Penggabungan Instruksi Karakter Utama (Aturan SQL Ketat)
 sql_character_instruction = """
 You are a smart and professional AI assistant specializing in querying a computer store's SQL database to answer user questions.
 You have access to tools for inspecting the database schema and executing SQL queries.
@@ -157,9 +167,9 @@ if reset_button:
 
 # 6. Tampilkan Welcome Message jika belum ada obrolan
 if len(st.session_state.messages) == 0:
-    st.chat_message("assistant").markdown("Halo! Saya adalah AI profesional database toko komputer Anda. Judul saya sekarang bisa bergerak dinamis dan melayang! Silakan masukkan data atau pertanyaan yang ingin Anda uji.")
+    st.chat_message("assistant").markdown("Halo! Saya adalah AI profesional database toko komputer Anda. Sekarang seluruh balon obrolan dan karakter kita akan muncul dengan efek gerakan transisi yang halus! Silakan berikan pertanyaan Anda.")
 
-# 7. Tampilkan Riwayat Obrolan beserta Timestamp di Layar
+# 7. Tampilkan Riwayat Obrolan beserta Timestamp di Layar (Otomatis Bergerak saat Dimuat)
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
@@ -169,7 +179,7 @@ for msg in st.session_state.messages:
 if prompt := st.chat_input("Ketik pertanyaan terkait database atau produk di sini..."):
     current_time = datetime.now().strftime("%H:%M")
     
-    # Tampilkan dan simpan pesan user
+    # Tampilkan dan simpan pesan user (Efek bergerak dipicu secara otomatis oleh CSS)
     st.session_state.messages.append({"role": "user", "content": prompt, "time": current_time})
     with st.chat_message("user"):
         st.markdown(prompt)
