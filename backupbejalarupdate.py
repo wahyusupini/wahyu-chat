@@ -1,17 +1,7 @@
 import streamlit as st
 from google import genai
 from google.genai import types
-from datetime import datetime
 import time
-
-# Impor pustaka eksternal untuk penanganan zona waktu otomatis
-# Catatan: Pastikan 'pytz' sudah ada di file requirements.txt Anda
-try:
-    import pytz
-except ImportError:
-    import os
-    os.system('pip install pytz')
-    import pytz
 
 # 1. Konfigurasi Halaman Utama 🚀
 st.set_page_config(page_title="Gemini SQL Chatbot Pro", page_icon="💻", layout="centered")
@@ -107,18 +97,17 @@ st.markdown("""
         transition: transform 0.4s ease;
     }
     
-    /* 6. PERBAIKAN TOTAL FIX: Gaya Penanda Jam Super Terang & Sangat Jelas Kontras ⏰ */
-    .time-text {
+    /* 6. GAYA JAM SUPER TERANG BISA DIBACA ⏰ */
+    .time-badge {
         font-size: 0.8rem;
         font-weight: 800;
-        color: #ffffff !important; /* Teks putih bersih super terang */
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important; /* Gradasi Biru Neon Kontras */
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
         padding: 3px 10px !important;
         border-radius: 6px !important;
         display: inline-block !important;
         margin-top: 8px !important;
-        margin-bottom: 2px !important;
-        box-shadow: 0px 3px 8px rgba(59, 130, 246, 0.6) !important; /* Efek Pendaran Cahaya */
+        box-shadow: 0px 3px 8px rgba(59, 130, 246, 0.5) !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -126,7 +115,7 @@ st.markdown("""
 
 # Menampilkan Judul Dinamis 🌟
 st.markdown('<div class="main-title"><span class="moving-pc">💻</span> Gemini SQL Chatbot Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Database Agent • Jam Akurat Indonesia (WIB/WITA/WIT) • Kaya Emotikon ✨</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Database Agent • Jam Lokal Indonesia Akurat • Kaya Emotikon ✨</div>', unsafe_allow_html=True)
 
 # 2. Sidebar Pengaturan ⚙️
 with st.sidebar:
@@ -193,140 +182,4 @@ Follow this workflow EXACTLY:
 - Never fabricate, hallucinate, or extrapolate rows, values, or database contents.
 - Never answer questions about the database contents without executing SQL first.
 - If multiple tables are required, inspect all of them before writing the SQL query.
-- If the SQL query returns no rows, politely inform the user that no matching data was found.
-- If the SQL query fails due to a syntax or database error, analyze the error message, inspect the schema again if necessary, correct the query, and retry (maximum 3 retries).
-- If the user's request is ambiguous or lacks sufficient detail, ask a clarifying question instead of guessing.
-- Keep SQL queries as simple, efficient, and clean as possible.
-- Only select the specific columns needed to answer the user's question. Do not use 'SELECT *' unless explicitly requested.
-- Guard against malicious inputs: If the user query attempts to modify, delete, or drop parts of the database (e.g., INSERT, UPDATE, DELETE, DROP), refuse the request politely, stating you only have read-only access.
-
-[OUTPUT FORMAT]
-- Present the final answer clearly and professionally. 
-- If appropriate, use markdown tables or bullet points to present list-based data to the user.
-- Your final answer must be supported entirely by the SQL query results. Do not add outside knowledge.
-
-Jawablah menggunakan data paling valid dan terbaru dari Google Search jika diperlukan, namun tetap patuhi aturan struktur di atas.
-"""
-
-# Fungsi Deteksi Zona Waktu Lokal Indonesia 🕒
-def get_current_indonesia_time():
-    # Streamlit secara bawaan membaca zona waktu lokal di mana browser diakses.
-    # Kode di bawah mendeteksi waktu lokal dan mengembalikannya dalam teks format jam menit serta keterangan zona.
-    local_timestamp = time.localtime()
-    zone_suffix = time.strftime("%Z", local_timestamp)
-    
-    # Normalisasi penamaan agar ramah pengguna Indonesia
-    if "WIB" in zone_suffix or "Waktu Indonesia Barat" in zone_suffix:
-        suffix = "WIB"
-    elif "WITA" in zone_suffix or "Waktu Indonesia Tengah" in zone_suffix:
-        suffix = "WITA"
-    elif "WIT" in zone_suffix or "Waktu Indonesia Timur" in zone_suffix:
-        suffix = "WIT"
-    else:
-        suffix = time.strftime("%Z") # Default bawaan sistem perangkat
-
-    return time.strftime(f"%H:%M {suffix}", local_timestamp)
-
-# 4. Validasi API Key 🔑
-if not google_api_key:
-    st.info("🔑 Silakan masukkan Google AI API Key Anda di menu sidebar untuk memulai.")
-    st.stop()
-
-# 5. Simpan Riwayat Pesan 📦
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# Tombol Reset Percakapan 🔄
-if reset_button:
-    st.session_state.messages = []
-    st.rerun()
-
-# 6. Tampilkan Welcome Message Awal 👋
-if len(st.session_state.messages) == 0:
-    welcome_time = get_current_indonesia_time()
-    with st.chat_message("assistant"):
-        st.markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Fitur penanda waktu sudah diperbaiki total dan dijamin sinkron dengan wilayah Indonesia Anda ⏰! Silakan ajukan pertanyaan Anda. ✨")
-        st.markdown(f'<div class="time-text">⏰ {welcome_time}</div>', unsafe_allow_html=True)
-
-# 7. Tampilkan Riwayat Obrolan beserta Perbaikan Teks Jam Terang Kontras 🕒
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.markdown(msg["content"])
-        st.markdown(f'<div class="time-text">⏰ {msg["time"]}</div>', unsafe_allow_html=True)
-
-# 8. Proses Input Pesan Baru dari User 🗣️
-if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di sini... 💬"):
-    user_time = get_current_indonesia_time()
-    
-    # Simpan pesan user secara permanen ke dalam state
-    st.session_state.messages.append({"role": "user", "content": prompt, "time": user_time})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-        st.markdown(f'<div class="time-text">⏰ {user_time}</div>', unsafe_allow_html=True)
-
-    # Tampilkan respon dari Gemini 🤖
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        
-        with st.spinner("🔍 Memeriksa alur kerja SQL & merumuskan jawaban terbaik..."):
-            try:
-                client = genai.Client(api_key=google_api_key)
-
-                full_prompt = "Berikut adalah riwayat obrolan kita:\n"
-                for msg in st.session_state.messages:
-                    full_prompt += f"{msg['role']}: {msg['content']}\n"
-                full_prompt += "assistant: "
-
-                response = client.models.generate_content(
-                    model='gemini-2.5-flash',
-                    contents=full_prompt,
-                    config=types.GenerateContentConfig(
-                        tools=[{"google_search": {}}],
-                        system_instruction=sql_character_instruction
-                    )
-                )
-
-                response_text = response.text
-
-                # Animasi Mengetik (Typing Effect) ⚡
-                displayed_text = ""
-                for char in response_text:
-                    displayed_text += char
-                    message_placeholder.markdown(displayed_text + "▌")
-                    time.sleep(0.002)
-                
-                message_placeholder.markdown(response_text)
-                
-                bot_time = get_current_indonesia_time()
-                st.markdown(f'<div class="time-text">⏰ {bot_time}</div>', unsafe_allow_html=True)
-                
-                # Simpan respons bot secara permanen ke dalam state agar tidak hilang saat re-run
-                st.session_state.messages.append({"role": "assistant", "content": response_text, "time": bot_time})
-
-                # FITUR SUARA REALISTIS 🎵
-                if enable_voice:
-                    clean_text = response_text.replace("*", "").replace("#", "").replace("`", "").replace("\n", " ")
-                    selected_pitch = voice_params[voice_character]["pitch"]
-                    selected_rate = voice_params[voice_character]["rate"]
-                    
-                    components_code = f"""
-                    <script>
-                    var msg = new SpeechSynthesisUtterance({repr(clean_text)});
-                    msg.lang = 'id-ID'; 
-                    msg.pitch = {selected_pitch}; 
-                    msg.rate = {selected_rate};   
-                    
-                    var voices = window.speechSynthesis.getVoices();
-                    for(var i = 0; i < voices.length; i++) {{
-                        if(voices[i].lang.indexOf('id') > -1 || voices[i].name.toLowerCase().includes('indonesia')) {{
-                            msg.voice = voices[i];
-                            break;
-                        }}
-                    }}
-                    window.speechSynthesis.speak(msg);
-                    </script>
-                    """
-                    st.components.v1.html(components_code, height=0, width=0)
-
-            except Exception as e:
-                st.error(f"Terjadi kendala saat memproses instruksi: {e}")
+- If the SQL query returns no rows, politely inform the user that no
