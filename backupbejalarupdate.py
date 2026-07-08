@@ -7,7 +7,7 @@ import time
 # 1. Konfigurasi Halaman Utama
 st.set_page_config(page_title="Gemini SQL Chatbot Pro", page_icon="💻", layout="centered")
 
-# ==================== FITUR MENARIK: CUSTOM CSS BACKGROUND & ANIMASI ====================
+# ==================== FITUR MENARIK: CUSTOM CSS BACKGROUND & ANIMASI BERGERAK ====================
 st.markdown("""
     <style>
     /* 1. Mengubah Background Utama Aplikasi (Gradasi Warna Soft) */
@@ -22,14 +22,38 @@ st.markdown("""
         border-right: 1px solid rgba(255, 255, 255, 0.2);
     }
     
-    /* 3. Mempercantik Tampilan Teks Judul */
+    /* 3. FITUR KEREN: Judul Bergerak & Berubah Warna Otomatis */
+    @keyframes floatAndGlow {
+        0% {
+            transform: translateY(0px);
+            background-position: 0% 50%;
+        }
+        50% {
+            transform: translateY(-8px); /* Efek bergerak melayang ke atas */
+            background-position: 100% 50%; /* Efek gradasi warna bergeser */
+        }
+        100% {
+            transform: translateY(0px);
+            background-position: 0% 50%;
+        }
+    }
+
     .main-title {
-        font-size: 2.5rem;
+        font-size: 2.8rem;
         font-weight: 800;
-        color: #1e293b;
         text-align: center;
         margin-bottom: 5px;
+        
+        /* Membuat teks berwarna gradasi */
+        background: linear-gradient(270deg, #2563eb, #9333ea, #3b82f6, #06b6d4);
+        background-size: 400% 400%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        
+        /* Menjalankan animasi bergerak setiap 4 detik secara berulang */
+        animation: floatAndGlow 4s ease-in-out infinite;
     }
+    
     .subtitle {
         text-align: center;
         color: #64748b;
@@ -48,9 +72,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 # ==============================================================================
 
-# Menampilkan Judul dengan Gaya Baru
+# Menampilkan Judul dengan Gaya Animasi Baru
 st.markdown('<div class="main-title">💻 Gemini SQL Chatbot Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Asisten Database dengan Grounding & Pilihan Suara Pria/Wanita</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Asisten Database Interaktif • Judul Animasi • Pilihan Suara Pria/Wanita</div>', unsafe_allow_html=True)
 
 # 2. Sidebar Pengaturan
 with st.sidebar:
@@ -62,7 +86,7 @@ with st.sidebar:
     st.subheader("🔊 Pengaturan Suara")
     enable_voice = st.checkbox("Aktifkan Suara Bot (Auto-Speak)", value=False)
     
-    # FITUR MENARIK: Pilihan Karakter Suara Pria dan Wanita
+    # Pilihan Karakter Suara Pria dan Wanita
     voice_character = st.selectbox(
         "Pilih Karakter Suara:",
         [
@@ -77,8 +101,6 @@ with st.sidebar:
     reset_button = st.button("🔄 Reset Percakapan", use_container_width=True)
 
 # Pengaturan parameter suara berdasarkan pilihan karakter
-# Pitch: Tinggi/rendahnya suara (Wanita cenderung tinggi > 1.0, Pria cenderung rendah < 1.0)
-# Rate: Kecepatan berbicara
 voice_params = {
     "Wanita (Sari - Lembut & Ramah)": {"pitch": 1.2, "rate": 0.95},
     "Wanita (Sinta - Tegas & Formal)": {"pitch": 1.1, "rate": 1.05},
@@ -135,7 +157,7 @@ if reset_button:
 
 # 6. Tampilkan Welcome Message jika belum ada obrolan
 if len(st.session_state.messages) == 0:
-    st.chat_message("assistant").markdown("Halo! Saya adalah AI profesional database toko komputer Anda. Silakan tentukan karakter suara pria/wanita pilihan Anda di sidebar, lalu mari kita mulai memeriksa data!")
+    st.chat_message("assistant").markdown("Halo! Saya adalah AI profesional database toko komputer Anda. Judul saya sekarang bisa bergerak dinamis dan melayang! Silakan masukkan data atau pertanyaan yang ingin Anda uji.")
 
 # 7. Tampilkan Riwayat Obrolan beserta Timestamp di Layar
 for msg in st.session_state.messages:
@@ -180,7 +202,7 @@ if prompt := st.chat_input("Ketik pertanyaan terkait database atau produk di sin
 
                 response_text = response.text
 
-                # FITUR MENARIK: Animasi Mengetik (Typing Effect)
+                # Animasi Mengetik (Typing Effect)
                 displayed_text = ""
                 for char in response_text:
                     displayed_text += char
@@ -197,12 +219,9 @@ if prompt := st.chat_input("Ketik pertanyaan terkait database atau produk di sin
                 # Simpan ke riwayat
                 st.session_state.messages.append({"role": "assistant", "content": response_text, "time": bot_time})
 
-                # FITUR MENARIK: Mengeluarkan Suara Sesuai Pilihan (Pria/Wanita) via Web Speech API
+                # Mengeluarkan Suara Sesuai Pilihan (Pria/Wanita) via Web Speech API
                 if enable_voice:
-                    # Menghapus simbol markdown agar tidak terbaca aneh oleh sistem suara
                     clean_text = response_text.replace("*", "").replace("#", "").replace("`", "").replace("\n", " ")
-                    
-                    # Mengambil konfigurasi pitch dan rate berdasarkan pilihan di sidebar
                     selected_pitch = voice_params[voice_character]["pitch"]
                     selected_rate = voice_params[voice_character]["rate"]
                     
@@ -210,10 +229,9 @@ if prompt := st.chat_input("Ketik pertanyaan terkait database atau produk di sin
                     <script>
                     var msg = new SpeechSynthesisUtterance({repr(clean_text)});
                     msg.lang = 'id-ID'; 
-                    msg.pitch = {selected_pitch}; // Mengatur frekuensi suara pria/wanita
-                    msg.rate = {selected_rate};   // Mengatur kecepatan bicara
+                    msg.pitch = {selected_pitch}; 
+                    msg.rate = {selected_rate};   
                     
-                    // Mencoba mencari profil suara lokal yang cocok di browser jika tersedia
                     var voices = window.speechSynthesis.getVoices();
                     for(var i = 0; i < voices.length; i++) {{
                         if(voices[i].lang.indexOf('id') > -1) {{
@@ -221,7 +239,6 @@ if prompt := st.chat_input("Ketik pertanyaan terkait database atau produk di sin
                             break;
                         }}
                     }}
-                    
                     window.speechSynthesis.speak(msg);
                     </script>
                     """
