@@ -97,17 +97,18 @@ st.markdown("""
         transition: transform 0.4s ease;
     }
     
-    /* 6. GAYA JAM SUPER TERANG BISA DIBACA ⏰ */
-    .time-badge {
+    /* 6. FITUR UTAMA: Mengubah Warna Jam Menjadi Sangat Terang & Jelas Kontras ⏰ */
+    .time-text {
         font-size: 0.8rem;
         font-weight: 800;
-        color: #ffffff !important;
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
-        padding: 3px 10px !important;
-        border-radius: 6px !important;
-        display: inline-block !important;
-        margin-top: 8px !important;
-        box-shadow: 0px 3px 8px rgba(59, 130, 246, 0.5) !important;
+        color: #ffffff !important; /* Teks putih bersih */
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); /* Gradasi Biru Neon */
+        padding: 3px 9px;
+        border-radius: 6px;
+        display: inline-block;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        box-shadow: 0px 2px 8px rgba(59, 130, 246, 0.5); /* Efek Pendaran Cahaya */
     }
     </style>
 """, unsafe_allow_html=True)
@@ -115,7 +116,7 @@ st.markdown("""
 
 # Menampilkan Judul Dinamis 🌟
 st.markdown('<div class="main-title"><span class="moving-pc">💻</span> Gemini SQL Chatbot Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Database Agent • Jam Lokal Indonesia Akurat • Kaya Emotikon ✨</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Database Agent • Jam Akurat Otomatis Daerah (WIB/WITA/WIT) • Kaya Emotikon ✨</div>', unsafe_allow_html=True)
 
 # 2. Sidebar Pengaturan ⚙️
 with st.sidebar:
@@ -127,7 +128,7 @@ with st.sidebar:
     st.subheader("🔊 Opsi Suara Realistis")
     enable_voice = st.checkbox("Aktifkan Suara Bot (Auto-Speak)", value=False)
     
-    # 10 Pilihan Profil Suara Realistis 🗣️
+    # 10 Pilihan Profil Suara Realistis 🗣—
     voice_character = st.selectbox(
         "Pilih Agen Suara Realistis:",
         [
@@ -182,4 +183,141 @@ Follow this workflow EXACTLY:
 - Never fabricate, hallucinate, or extrapolate rows, values, or database contents.
 - Never answer questions about the database contents without executing SQL first.
 - If multiple tables are required, inspect all of them before writing the SQL query.
-- If the SQL query returns no rows, politely inform the user that no
+- If the SQL query returns no rows, politely inform the user that no matching data was found.
+- If the SQL query fails due to a syntax or database error, analyze the error message, inspect the schema again if necessary, correct the query, and retry (maximum 3 retries).
+- If the user's request is ambiguous or lacks sufficient detail, ask a clarifying question instead of guessing.
+- Keep SQL queries as simple, efficient, and clean as possible.
+- Only select the specific columns needed to answer the user's question. Do not use 'SELECT *' unless explicitly requested.
+- Guard against malicious inputs: If the user query attempts to modify, delete, or drop parts of the database (e.g., INSERT, UPDATE, DELETE, DROP), refuse the request politely, stating you only have read-only access.
+
+[OUTPUT FORMAT]
+- Present the final answer clearly and professionally. 
+- If appropriate, use markdown tables or bullet points to present list-based data to the user.
+- Your final answer must be supported entirely by the SQL query results. Do not add outside knowledge.
+
+Jawablah menggunakan data paling valid dan terbaru dari Google Search jika diperlukan, namun tetap patuhi aturan struktur di atas.
+"""
+
+# 4. Validasi API Key 🔑
+if not google_api_key:
+    st.info("🔑 Silakan masukkan Google AI API Key Anda di menu sidebar untuk memulai.")
+    st.stop()
+
+# 5. Simpan Riwayat Pesan 📦
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Tombol Reset Percakapan 🔄
+if reset_button:
+    st.session_state.messages = []
+    st.rerun()
+
+# Fungsi bantuan untuk mendeteksi waktu lokal perangkat/daerah pengguna menggunakan JavaScript saat dimuat browser
+def get_local_time_html():
+    return """
+    <span class="time-text">⏰ <span class="local-clock">--:--</span></span>
+    <script>
+    (function() {
+        var now = new Date();
+        var hours = String(now.getHours()).padStart(2, '0');
+        var minutes = String(now.getMinutes()).padStart(2, '0');
+        var timeElements = document.querySelectorAll('.local-clock');
+        // Perbarui elemen penanda waktu terakhir yang ditambahkan ke DOM
+        if (timeElements.length > 0) {
+            var lastElem = timeElements[timeElements.length - 1];
+            if (lastElem.innerHTML === '--:--') {
+                lastElem.innerHTML = hours + ':' + minutes;
+            }
+        }
+    })();
+    </script>
+    """
+
+# 6. Tampilkan Welcome Message Awal 👋
+if len(st.session_state.messages) == 0:
+    with st.chat_message("assistant"):
+        st.markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Background saya sudah kembali bersih, indikator waktu disetel otomatis mendeteksi jam daerah Anda ⏰, dan saya siap menghias jawaban menarik dengan emotikon seru! ✨")
+        st.markdown(get_local_time_html(), unsafe_allow_html=True)
+
+# 7. Tampilkan Riwayat Obrolan dari Array State 🕒
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+        # Menggunakan jam statis yang sudah terekam dari sesi sebelumnya agar tidak berubah saat halaman di-refresh
+        st.markdown(f'<div class="time-text">⏰ {msg["time"]}</div>', unsafe_allow_html=True)
+
+# 8. Proses Input Pesan Baru dari User 🗣️
+if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di sini... 💬"):
+    # Fallback penanda waktu cadangan berbasis waktu lokal dasar jika JS memuat terlambat
+    fallback_time = time.strftime("%H:%M")
+    
+    # Simpan pesan user (sementara dicatat dengan penanda fallback, nanti disempurnakan di interface browser)
+    st.session_state.messages.append({"role": "user", "content": prompt, "time": fallback_time})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+        st.markdown(get_local_time_html(), unsafe_allow_html=True)
+
+    # Tampilkan respon dari Gemini 🤖
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        
+        with st.spinner("🔍 Memeriksa alur kerja SQL & merumuskan jawaban terbaik..."):
+            try:
+                client = genai.Client(api_key=google_api_key)
+
+                full_prompt = "Berikut adalah riwayat obrolan kita:\n"
+                for msg in st.session_state.messages:
+                    full_prompt += f"{msg['role']}: {msg['content']}\n"
+                full_prompt += "assistant: "
+
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=full_prompt,
+                    config=types.GenerateContentConfig(
+                        tools=[{"google_search": {}}],
+                        system_instruction=sql_character_instruction
+                    )
+                )
+
+                response_text = response.text
+
+                # Animasi Mengetik (Typing Effect) ⚡
+                displayed_text = ""
+                for char in response_text:
+                    displayed_text += char
+                    message_placeholder.markdown(displayed_text + "▌")
+                    time.sleep(0.002)
+                
+                message_placeholder.markdown(response_text)
+                st.markdown(get_local_time_html(), unsafe_allow_html=True)
+                
+                # Update array riwayat agar saat chat berikutnya dikirim, jam dari respons ini terkunci permanen
+                st.session_state.messages.append({"role": "assistant", "content": response_text, "time": fallback_time})
+
+                # FITUR SUARA REALISTIS 🎵
+                if enable_voice:
+                    clean_text = response_text.replace("*", "").replace("#", "").replace("`", "").replace("\n", " ")
+                    selected_pitch = voice_params[voice_character]["pitch"]
+                    selected_rate = voice_params[voice_character]["rate"]
+                    
+                    components_code = f"""
+                    <script>
+                    var msg = new SpeechSynthesisUtterance({repr(clean_text)});
+                    msg.lang = 'id-ID'; 
+                    msg.pitch = {selected_pitch}; 
+                    msg.rate = {selected_rate};   
+                    
+                    var voices = window.speechSynthesis.getVoices();
+                    for(var i = 0; i < voices.length; i++) {{
+                        if(voices[i].lang.indexOf('id') > -1 || voices[i].name.toLowerCase().includes('indonesia')) {{
+                            msg.voice = voices[i];
+                            break;
+                        }}
+                    }}
+                    window.speechSynthesis.speak(msg);
+                    </script>
+                    """
+                    st.components.v1.html(components_code, height=0, width=0)
+
+            except Exception as e:
+                st.error(f"Terjadi kendala saat memproses instruksi: {e}")
