@@ -7,7 +7,7 @@ import time
 # 1. Konfigurasi Halaman Utama
 st.set_page_config(page_title="Gemini SQL Chatbot Pro", page_icon="💻", layout="centered")
 
-# ==================== FITUR MENARIK: CUSTOM CSS BACKGROUND & ANIMASI DINAMIS ====================
+# ==================== FITUR MENARIK: CUSTOM CSS BACKGROUND & ANIMASI AVATAR HIDUP ====================
 st.markdown("""
     <style>
     /* 1. Mengubah Background Utama Aplikasi (Gradasi Warna Soft) */
@@ -22,7 +22,7 @@ st.markdown("""
         border-right: 1px solid rgba(255, 255, 255, 0.2);
     }
     
-    /* 3. FITUR KEREN: Judul Bergerak Melayang & Berubah Warna */
+    /* 3. Judul Bergerak Melayang & Berubah Warna Otomatis */
     @keyframes floatAndGlow {
         0% { transform: translateY(0px); background-position: 0% 50%; }
         50% { transform: translateY(-8px); background-position: 100% 50%; }
@@ -48,30 +48,39 @@ st.markdown("""
         margin-bottom: 25px;
     }
     
-    /* 4. FITUR BARU: Animasi Bergerak Muncul pada Balon Chat & Karater (Avatar) */
+    /* 4. Animasi Bergerak Muncul pada Balon Chat */
     @keyframes chatPopUp {
-        0% {
-            opacity: 0;
-            transform: translateY(20px) scale(0.98);
-        }
-        100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
+        0% { opacity: 0; transform: translateY(20px) scale(0.98); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    /* Menerapkan efek bergerak halus pada setiap elemen chat di halaman */
     [data-testid="stChatMessage"] {
-        animation: chatPopUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: chatPopUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     
-    /* Efek sedikit interaktif saat kursor menyentuh balon chat */
-    [data-testid="stChatMessage"]:hover {
-        transform: translateY(-2px);
-        transition: transform 0.2s ease;
+    /* 5. FITUR PREMIUM: Kustomisasi & Animasi Karakter Avatar (User & Bot) */
+    /* Mengganti & Mempercantik Ikon Avatar User */
+    [data-testid="stChatMessage"] img[src*="user"] {
+        content: url("https://cdn-icons-png.flaticon.com/512/4140/4140037.png") !important; /* Avatar Pria Keren 3D */
+        border-radius: 50%;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
+        transition: transform 0.3s ease;
     }
     
-    /* 5. Gaya Teks Waktu (Timestamp) */
+    /* Mengganti & Mempercantik Ikon Avatar Assistant (Bot) */
+    [data-testid="stChatMessage"] img[src*="assistant"] {
+        content: url("https://cdn-icons-png.flaticon.com/512/8943/8943377.png") !important; /* Avatar Robot AI Futuristik */
+        border-radius: 50%;
+        box-shadow: 0px 4px 10px rgba(37, 99, 235, 0.3);
+        transition: transform 0.3s ease;
+    }
+
+    /* Membuat Karakter Bergerak Sedikit Membesar Saat Disentuh Kursor (Hover) */
+    [data-testid="stChatMessage"]:hover img {
+        transform: scale(1.15) rotate(5deg);
+    }
+    
+    /* 6. Gaya Teks Waktu (Timestamp) */
     .time-text {
         font-size: 0.75rem;
         color: #94a3b8;
@@ -84,7 +93,7 @@ st.markdown("""
 
 # Menampilkan Judul Dinamis
 st.markdown('<div class="main-title">💻 Gemini SQL Chatbot Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Database Agent • Animasi Obrolan Bergerak • Suara Pria/Wanita</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Database Agent • Karakter Kustom 3D Hidup • Pilihan Suara Pria/Wanita</div>', unsafe_allow_html=True)
 
 # 2. Sidebar Pengaturan
 with st.sidebar:
@@ -167,9 +176,9 @@ if reset_button:
 
 # 6. Tampilkan Welcome Message jika belum ada obrolan
 if len(st.session_state.messages) == 0:
-    st.chat_message("assistant").markdown("Halo! Saya adalah AI profesional database toko komputer Anda. Sekarang seluruh balon obrolan dan karakter kita akan muncul dengan efek gerakan transisi yang halus! Silakan berikan pertanyaan Anda.")
+    st.chat_message("assistant").markdown("Halo! Saya adalah AI profesional database toko komputer Anda. Sekarang karakter kita berdua sudah diubah menjadi model ilustrasi kustom yang interaktif dan bisa bergerak saat disentuh kursor! Silakan berikan pertanyaan Anda.")
 
-# 7. Tampilkan Riwayat Obrolan beserta Timestamp di Layar (Otomatis Bergerak saat Dimuat)
+# 7. Tampilkan Riwayat Obrolan beserta Timestamp di Layar
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
@@ -179,7 +188,7 @@ for msg in st.session_state.messages:
 if prompt := st.chat_input("Ketik pertanyaan terkait database atau produk di sini..."):
     current_time = datetime.now().strftime("%H:%M")
     
-    # Tampilkan dan simpan pesan user (Efek bergerak dipicu secara otomatis oleh CSS)
+    # Tampilkan dan simpan pesan user
     st.session_state.messages.append({"role": "user", "content": prompt, "time": current_time})
     with st.chat_message("user"):
         st.markdown(prompt)
