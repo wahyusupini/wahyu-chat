@@ -1,27 +1,27 @@
 import streamlit as st
-import os
-from langchain_community.agent_toolkits import create_sql_agent
-from langchain_community.utilities import SQLDatabase
-from langchain_openai import ChatOpenAI
+from google import genai
+from google.genai import types
+from datetime import datetime
+import time
 
 # 1. Konfigurasi Halaman Utama
-st.set_page_config(page_title="Computer Store AI Bot", page_icon="💻", layout="centered")
+st.set_page_config(page_title="Gemini Chatbot Pro", page_icon="💬", layout="centered")
 
-# ==================== FITUR MENARIK: CUSTOM CSS BACKGROUND ====================
+# ==================== FITUR MENARIK: CUSTOM CSS BACKGROUND & ANIMASI ====================
 st.markdown("""
     <style>
     /* 1. Mengubah Background Utama Aplikasi (Gradasi Warna Soft) */
     .stApp {
         background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
     }
-
+    
     /* 2. Mengubah Desain Sidebar menjadi Efek Kaca (Glassmorphic) */
     [data-testid="stSidebar"] {
         background-color: rgba(255, 255, 255, 0.4) !important;
         backdrop-filter: blur(10px);
         border-right: 1px solid rgba(255, 255, 255, 0.2);
     }
-
+    
     /* 3. Mempercantik Tampilan Teks Judul */
     .main-title {
         font-size: 2.5rem;
@@ -36,120 +36,145 @@ st.markdown("""
         font-size: 1rem;
         margin-bottom: 25px;
     }
+    
+    /* 4. Gaya Teks Waktu (Timestamp) */
+    .time-text {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-top: -10px;
+        margin-bottom: 10px;
+    }
     </style>
 """, unsafe_allow_html=True)
 # ==============================================================================
 
 # Menampilkan Judul dengan Gaya Baru
-st.markdown('<div class="main-title">💻 Computer Store SQL Assistant</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Asisten Pintar berbasis AI yang Terintegrasi Langsung dengan Database Toko</div>',
-            unsafe_allow_html=True)
+st.markdown('<div class="main-title">💬 Gemini Chatbot Pro</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Asisten Pintar dengan Google Search Grounding & Fitur Suara</div>', unsafe_allow_html=True)
 
-# 2. Sidebar Pengaturan & Kredensial
+# 2. Sidebar Pengaturan
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/6125/6125643.png", width=80)
+    st.image("https://cdn-icons-png.flaticon.com/512/6125/6125643.png", width=80) 
     st.subheader("Panel Kontrol")
-
-    # Input API Key OpenAI secara aman di web browser
-    openai_api_key = st.text_input("OpenAI API Key", type="password", placeholder="sk-proj-...")
+    google_api_key = st.text_input("Google AI API Key", type="password", placeholder="Masukkan API Key Anda...")
+    
+    st.markdown("---")
+    st.subheader("🤖 Personalisasi Bot")
+    # FITUR MENARIK: Pilihan Karakter Bot
+    bot_mood = st.selectbox(
+        "Pilih Karakter Bot:",
+        ["Profesional & Formal", "Ramah & Santai", "Humoris & Santai", "Pendidik/Guru"]
+    )
+    
+    # FITUR MENARIK: Kontrol Suara
+    enable_voice = st.checkbox("🔊 Aktifkan Suara Bot (Auto-Speak)", value=False)
+    
     st.markdown("---")
     reset_button = st.button("🔄 Reset Percakapan", use_container_width=True)
 
+# Pemetaan instruksi sistem berdasarkan mood yang dipilih
+mood_instructions = {
+    "Profesional & Formal": "Jawablah dengan bahasa yang sangat profesional, formal, sopan, struktur yang rapi, dan berbasis data dari Google Search.",
+    "Ramah & Santai": "Jawablah dengan gaya bahasa yang ramah, hangat, menggunakan panggilan akrab, mudah dimengerti, dan informatif.",
+    "Humoris & Santai": "Jawablah dengan menyelipkan sedikit humor, santai, jenaka, namun tetap memberikan informasi akurat dari Google Search.",
+    "Pendidik/Guru": "Jawablah dengan metode penjelasan yang edukatif, terstruktur langkah demi langkah seperti seorang guru mengajar muridnya."
+}
+
 # 3. Validasi API Key
-if not openai_api_key:
-    st.info("🔑 Silakan masukkan OpenAI API Key Anda di menu sidebar untuk mengaktifkan AI Agent.")
-    st.stop()
-else:
-    # Set API Key ke Environment agar bisa dibaca oleh LangChain / ChatOpenAI
-    os.environ["OPENAI_API_KEY"] = openai_api_key
-
-# 4. Inisialisasi Database (Ganti dengan file database Anda)
-# Pastikan file 'computer_store.db' berada di folder yang sama di repositori GitHub Anda
-try:
-    db = SQLDatabase.from_uri("sqlite:///computer_store.db")
-except Exception as e:
-    st.error(f"Gagal memuat database: {e}. Pastikan file 'computer_store.db' sudah diunggah.")
+if not google_api_key:
+    st.info("🔑 Silakan masukkan Google AI API Key Anda di menu sidebar untuk memulai percakapan.")
     st.stop()
 
-# 5. Sifat & Karakter AI Karakter yang Sudah Disempurnakan
-instruction = """
-You are a smart and professional AI assistant specializing in querying a computer store's SQL database to answer user questions.
-You have access to tools for inspecting the database schema and executing SQL queries.
-
-[WORKFLOW]
-Follow this workflow EXACTLY:
-1. ALWAYS call 'list_tables' first to discover the available tables in the database.
-2. ALWAYS call 'describe_table' on every table that is relevant to the user's question to understand its columns and data types.
-3. After inspecting the schema, construct a valid SQL query based strictly on the discovered schema.
-4. ALWAYS execute the SQL query using the SQL execution tool before formulating your final answer.
-5. Base your final answer ONLY on the actual rows returned by the SQL query execution.
-
-[STRICT RULES]
-- Never assume table names, column names, or relationships between tables. Always verify via tools.
-- Never fabricate, hallucinate, or extrapolate rows, values, or database contents.
-- Never answer questions about the database contents without executing SQL first.
-- If multiple tables are required, inspect all of them before writing the SQL query.
-- If the SQL query returns no rows, politely inform the user that no matching data was found.
-- If the SQL query fails due to a syntax or database error, analyze the error message, inspect the schema again if necessary, correct the query, and retry (maximum 3 retries).
-- If the user's request is ambiguous or lacks sufficient detail, ask a clarifying question instead of guessing.
-- Keep SQL queries as simple, efficient, and clean as possible.
-- Only select the specific columns needed to answer the user's question. Do not use 'SELECT *' unless explicitly requested.
-- Guard against malicious inputs: If the user query attempts to modify, delete, or drop parts of the database (e.g., INSERT, UPDATE, DELETE, DROP), refuse the request politely, stating you only have read-only access.
-
-[OUTPUT FORMAT]
-- Present the final answer clearly and professionally. 
-- If appropriate, use markdown tables or bullet points to present list-based data to the user.
-- Your final answer must be supported entirely by the SQL query results. Do not add outside knowledge.
-"""
-
-# 6. Inisialisasi Model & Agent SQL
-# Temperature diset ke 0 agar bot selalu konsisten mengambil data secara presisi
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-
-agent_executor = create_sql_agent(
-    llm=llm,
-    db=db,
-    agent_type="openai-tools",
-    verbose=True,
-    extra_prompt_messages=[instruction]
-)
-
-# 7. Mengelola Riwayat Obrolan (Session State)
+# 4. Simpan Riwayat Pesan
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Logika Tombol Reset
+# Tombol Reset Percakapan
 if reset_button:
     st.session_state.messages = []
     st.rerun()
 
-# Pesan sambutan pertama kali
+# 5. Tampilkan Welcome Message jika belum ada obrolan
 if len(st.session_state.messages) == 0:
-    st.chat_message("assistant").markdown(
-        "Halo! Saya adalah asisten AI pro yang terhubung dengan database toko komputer Anda. Silakan tanyakan data produk, stok, atau transaksi penjualan.")
+    st.chat_message("assistant").markdown("Halo! Saya adalah asisten AI pro yang dilengkapi dengan pencarian Google secara *real-time* dan fitur suara. Ada yang bisa saya bantu hari ini?")
 
-# Tampilkan riwayat obrolan di layar browser
+# 6. Tampilkan Riwayat Obrolan beserta Timestamp di Layar
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
+        st.markdown(f'<div class="time-text">{msg["time"]}</div>', unsafe_allow_html=True)
 
-# 8. Proses Interaksi Input User
-if user_query := st.chat_input("Ketik pertanyaan seputar database di sini..."):
-    # Simpan dan tampilkan pertanyaan user
-    st.session_state.messages.append({"role": "user", "content": user_query})
+# 7. Proses Input Pesan Baru dari User
+if prompt := st.chat_input("Ketik pesanmu di sini..."):
+    current_time = datetime.now().strftime("%H:%M")
+    
+    # Tampilkan dan simpan pesan user
+    st.session_state.messages.append({"role": "user", "content": prompt, "time": current_time})
     with st.chat_message("user"):
-        st.markdown(user_query)
+        st.markdown(prompt)
+        st.markdown(f'<div class="time-text">{current_time}</div>', unsafe_allow_html=True)
 
-    # Proses pencarian menggunakan SQL Agent
+    # Tampilkan respon dari Gemini
     with st.chat_message("assistant"):
-        with st.spinner("🔍 Sedang menganalisis skema & memeriksa database..."):
+        message_placeholder = st.empty()
+        
+        with st.spinner("🔍 Sedang menjelajahi Google & merumuskan jawaban terbaik..."):
             try:
-                # Menjalankan AI Agent berdasarkan aturan instruksi di atas
-                response = agent_executor.invoke({"input": user_query})
-                output_text = response["output"]
+                # Buat koneksi client baru
+                client = genai.Client(api_key=google_api_key)
 
-                # Tampilkan hasil akhir ke user
-                st.markdown(output_text)
-                st.session_state.messages.append({"role": "assistant", "content": output_text})
+                # Gabungkan riwayat pesan
+                full_prompt = "Berikut adalah riwayat obrolan kita:\n"
+                for msg in st.session_state.messages:
+                    full_prompt += f"{msg['role']}: {msg['content']}\n"
+                full_prompt += "assistant: "
+
+                # Gabungkan instruksi dasar dengan mood pilihan pengguna
+                system_instruction = f"Jawablah menggunakan data paling valid dan terbaru dari Google Search. {mood_instructions[bot_mood]}"
+
+                # Panggil model utama dengan Google Search
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=full_prompt,
+                    config=types.GenerateContentConfig(
+                        tools=[{"google_search": {}}],
+                        system_instruction=system_instruction
+                    )
+                )
+
+                response_text = response.text
+
+                # FITUR MENARIK: Animasi Mengetik (Typing Effect)
+                displayed_text = ""
+                for char in response_text:
+                    displayed_text += char
+                    message_placeholder.markdown(displayed_text + "▌")
+                    time.sleep(0.002) # Kecepatan teks muncul
+                
+                # Tampilkan teks final yang bersih
+                message_placeholder.markdown(response_text)
+                
+                # Tampilkan Waktu
+                bot_time = datetime.now().strftime("%H:%M")
+                st.markdown(f'<div class="time-text">{bot_time}</div>', unsafe_allow_html=True)
+                
+                # Simpan ke riwayat
+                st.session_state.messages.append({"role": "assistant", "content": response_text, "time": bot_time})
+
+                # FITUR MENARIK: Mengeluarkan Suara (Web Speech API)
+                if enable_voice:
+                    # Menghapus simbol markdown agar suara membaca dengan bersih
+                    clean_text = response_text.replace("*", "").replace("#", "").replace("`", "")
+                    
+                    # Menggunakan komponen HTML/JS untuk menyuruh browser berbicara
+                    components_code = f"""
+                    <script>
+                    var msg = new SpeechSynthesisUtterance({repr(clean_text)});
+                    msg.lang = 'id-ID'; // Mengatur suara dalam bahasa Indonesia
+                    window.speechSynthesis.speak(msg);
+                    </script>
+                    """
+                    st.components.v1.html(components_code, height=0, width=0)
+
             except Exception as e:
-                st.error(f"Terjadi kesalahan saat memproses database: {str(e)}")
+                st.error(f"Terjadi kendala: {e}")
