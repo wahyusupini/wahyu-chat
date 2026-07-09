@@ -1,0 +1,37 @@
+Mari kita bedah terlebih dahulu mengenai perintah sudo apt --fix-broken install, kemudian saya akan berikan solusi satu perintah (one-liner) global yang Anda butuhkan.
+
+Apakah Boleh Menjalankan sudo apt --fix-broken install Meskipun Tidak Ada Error?
+Boleh, tetapi tidak ada gunanya untuk membersihkan file sampah.
+
+Perintah --fix-broken (atau -f) dirancang khusus untuk memperbaiki sistem manajemen paket (dpkg) yang mendeteksi adanya dependensi yang rusak atau terputus (misalnya, Anda menginstal aplikasi A, tetapi aplikasi A butuh aplikasi B yang belum terinstal).
+
+Jika tidak ada error: Perintah tersebut hanya akan memindai basis data paket Anda, melihat semuanya aman, lalu selesai tanpa melakukan tindakan apa pun.
+
+Kesimpulan: Perintah ini bukan untuk membersihkan file usang atau file sampah.
+
+Solusi: Perintah Global Sekali Jalan untuk Membersihkan Kali Linux
+Untuk menghapus file sampah, paket usang, sisa konfigurasi aplikasi yang sudah dihapus, serta membersihkan cache installer dalam satu perintah terintegrasi, Anda bisa menggabungkan beberapa fungsi apt menggunakan operator &&.
+
+Silakan salin dan jalankan perintah global ini di terminal Kali Linux Anda:
+
+Bash
+sudo apt autoremove --purge -y && sudo apt autoclean && sudo apt clean
+Apa saja yang dilakukan perintah di atas?
+sudo apt autoremove --purge -y
+Ini adalah bagian paling penting. Perintah ini menghapus paket-paket (seperti dependensi atau kernel lama) yang dulunya dibutuhkan oleh aplikasi lain, tetapi sekarang sudah tidak digunakan lagi (usang). Flag --purge memastikan file konfigurasi dari paket usang tersebut juga ikut dihapus bersih.
+
+sudo apt autoclean
+Menghapus file installer (.deb) di dalam cache Anda yang sudah usang dan sudah ada versi barunya, sehingga tidak memenuhi ruang penyimpanan.
+
+sudo apt clean
+Mengosongkan seluruh cache di /var/cache/apt/archives/. Ini akan menghapus semua file .deb yang pernah Anda unduh saat instalasi aplikasi. Tenang, ini tidak menghapus aplikasi yang sudah terinstal, hanya menghapus mentahan installernya saja.
+
+Tips Tambahan: Pembersihan Sampah Sistem (Opsional)
+Jika Anda ingin melangkah lebih jauh untuk menghapus file sampah sistem (bukan hanya paket aplikasi), Anda bisa menginstal BleachBit versi CLI, yang merupakan standar industri untuk pembersihan Linux:
+
+Bash
+sudo apt install bleachbit -y
+Setelah terinstal, Anda bisa membersihkan cache sistem global dengan:
+
+Bash
+sudo bleachbit --clean system.cache system.tmp
