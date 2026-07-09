@@ -97,18 +97,17 @@ st.markdown("""
         transition: transform 0.4s ease;
     }
     
-    /* 6. FITUR UTAMA: Mengubah Warna Jam Menjadi Sangat Terang & Jelas Kontras ⏰ */
-    .time-text {
+    /* 6. GAYA JAM NEON TERANG BISA DIBACA ⏰ */
+    .time-badge {
         font-size: 0.8rem;
         font-weight: 800;
-        color: #ffffff !important; /* Teks putih bersih */
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); /* Gradasi Biru Neon */
-        padding: 3px 9px;
-        border-radius: 6px;
-        display: inline-block;
-        margin-top: 5px;
-        margin-bottom: 5px;
-        box-shadow: 0px 2px 8px rgba(59, 130, 246, 0.5); /* Efek Pendaran Cahaya */
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
+        padding: 3px 10px !important;
+        border-radius: 6px !important;
+        display: inline-block !important;
+        margin-top: 8px !important;
+        box-shadow: 0px 3px 8px rgba(59, 130, 246, 0.5) !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -116,7 +115,7 @@ st.markdown("""
 
 # Menampilkan Judul Dinamis 🌟
 st.markdown('<div class="main-title"><span class="moving-pc">💻</span> Gemini SQL Chatbot Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Database Agent • Jam Akurat Otomatis Daerah (WIB/WITA/WIT) • Kaya Emotikon ✨</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Database Agent • Kuota Besar 1.500/Hari • Jam Daerah Akurat • Kaya Emotikon ✨</div>', unsafe_allow_html=True)
 
 # 2. Sidebar Pengaturan ⚙️
 with st.sidebar:
@@ -128,7 +127,7 @@ with st.sidebar:
     st.subheader("🔊 Opsi Suara Realistis")
     enable_voice = st.checkbox("Aktifkan Suara Bot (Auto-Speak)", value=False)
     
-    # 10 Pilihan Profil Suara Realistis 🗣—
+    # 10 Pilihan Profil Suara Realistis 🗣️
     voice_character = st.selectbox(
         "Pilih Agen Suara Realistis:",
         [
@@ -198,6 +197,34 @@ Follow this workflow EXACTLY:
 Jawablah menggunakan data paling valid dan terbaru dari Google Search jika diperlukan, namun tetap patuhi aturan struktur di atas.
 """
 
+# FITUR INJEKSI HTML JAVASCRIPT AMAN UNTUK MENAMPILKAN JAM ASLI DAERAH USER KLIEN
+def render_chat_time(unique_id):
+    html_code = f"""
+    <div id="wrapper_{unique_id}">
+        <span class="time-badge">⏰ <span id="clock_{unique_id}">--:--</span></span>
+    </div>
+    <script>
+        (function() {{
+            var timeOptions = {{ hour: '2-digit', minute: '2-digit', hour12: false }};
+            var localTime = new Date().toLocaleTimeString('id-ID', timeOptions);
+            
+            var timeZoneString = new Date().toLocaleTimeString('id-ID', {{ timeZoneName: 'short' }});
+            var zone = "WIB"; 
+            if (timeZoneString.includes("WITA") || timeZoneString.includes("GMT+8")) {{
+                zone = "WITA";
+            }} else if (timeZoneString.includes("WIT") || timeZoneString.includes("GMT+9")) {{
+                zone = "WIT";
+            }}
+            
+            var element = document.getElementById("clock_{unique_id}");
+            if (element) {{
+                element.innerHTML = localTime + " " + zone;
+            }}
+        }})();
+    </script>
+    """
+    return st.components.v1.html(html_code, height=35)
+
 # 4. Validasi API Key 🔑
 if not google_api_key:
     st.info("🔑 Silakan masukkan Google AI API Key Anda di menu sidebar untuk memulai.")
@@ -212,50 +239,25 @@ if reset_button:
     st.session_state.messages = []
     st.rerun()
 
-# Fungsi bantuan untuk mendeteksi waktu lokal perangkat/daerah pengguna menggunakan JavaScript saat dimuat browser
-def get_local_time_html():
-    return """
-    <span class="time-text">⏰ <span class="local-clock">--:--</span></span>
-    <script>
-    (function() {
-        var now = new Date();
-        var hours = String(now.getHours()).padStart(2, '0');
-        var minutes = String(now.getMinutes()).padStart(2, '0');
-        var timeElements = document.querySelectorAll('.local-clock');
-        // Perbarui elemen penanda waktu terakhir yang ditambahkan ke DOM
-        if (timeElements.length > 0) {
-            var lastElem = timeElements[timeElements.length - 1];
-            if (lastElem.innerHTML === '--:--') {
-                lastElem.innerHTML = hours + ':' + minutes;
-            }
-        }
-    })();
-    </script>
-    """
-
 # 6. Tampilkan Welcome Message Awal 👋
 if len(st.session_state.messages) == 0:
     with st.chat_message("assistant"):
-        st.markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Background saya sudah kembali bersih, indikator waktu disetel otomatis mendeteksi jam daerah Anda ⏰, dan saya siap menghias jawaban menarik dengan emotikon seru! ✨")
-        st.markdown(get_local_time_html(), unsafe_allow_html=True)
+        st.markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Model saya kini menggunakan versi 1.5 Flash yang bebas dari limit kuota ketat ⏰! Silakan ajukan pertanyaan Anda. ✨")
+        render_chat_time("welcome")
 
-# 7. Tampilkan Riwayat Obrolan dari Array State 🕒
-for msg in st.session_state.messages:
+# 7. Tampilkan Riwayat Obrolan dari State 🕒
+for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
-        # Menggunakan jam statis yang sudah terekam dari sesi sebelumnya agar tidak berubah saat halaman di-refresh
-        st.markdown(f'<div class="time-text">⏰ {msg["time"]}</div>', unsafe_allow_html=True)
+        render_chat_time(f"hist_{idx}")
 
 # 8. Proses Input Pesan Baru dari User 🗣️
 if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di sini... 💬"):
-    # Fallback penanda waktu cadangan berbasis waktu lokal dasar jika JS memuat terlambat
-    fallback_time = time.strftime("%H:%M")
     
-    # Simpan pesan user (sementara dicatat dengan penanda fallback, nanti disempurnakan di interface browser)
-    st.session_state.messages.append({"role": "user", "content": prompt, "time": fallback_time})
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
-        st.markdown(get_local_time_html(), unsafe_allow_html=True)
+        render_chat_time(f"user_{len(st.session_state.messages)}")
 
     # Tampilkan respon dari Gemini 🤖
     with st.chat_message("assistant"):
@@ -270,8 +272,9 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di s
                     full_prompt += f"{msg['role']}: {msg['content']}\n"
                 full_prompt += "assistant: "
 
+                # AKSI UTAMA: Pemanggilan resmi diubah menjadi gemini-1.5-flash ✨
                 response = client.models.generate_content(
-                    model='gemini-2.5-flash',
+                    model='gemini-1.5-flash', 
                     contents=full_prompt,
                     config=types.GenerateContentConfig(
                         tools=[{"google_search": {}}],
@@ -289,10 +292,9 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di s
                     time.sleep(0.002)
                 
                 message_placeholder.markdown(response_text)
-                st.markdown(get_local_time_html(), unsafe_allow_html=True)
+                render_chat_time(f"bot_{len(st.session_state.messages)}")
                 
-                # Update array riwayat agar saat chat berikutnya dikirim, jam dari respons ini terkunci permanen
-                st.session_state.messages.append({"role": "assistant", "content": response_text, "time": fallback_time})
+                st.session_state.messages.append({"role": "assistant", "content": response_text})
 
                 # FITUR SUARA REALISTIS 🎵
                 if enable_voice:
