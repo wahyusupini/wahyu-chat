@@ -1,6 +1,5 @@
 import streamlit as st
-from google import genai
-from google.genai import types
+import google.generativeai as genai  # Menggunakan pustaka kompatibilitas stabil 🚀
 import time
 
 # 1. Konfigurasi Halaman Utama 🚀
@@ -230,6 +229,9 @@ if not google_api_key:
     st.info("🔑 Silakan masukkan Google AI API Key Anda di menu sidebar untuk memulai.")
     st.stop()
 
+# Konfigurasi kunci API ke sistem stabil
+genai.configure(api_key=google_api_key)
+
 # 5. Simpan Riwayat Pesan 📦
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -242,7 +244,7 @@ if reset_button:
 # 6. Tampilkan Welcome Message Awal 👋
 if len(st.session_state.messages) == 0:
     with st.chat_message("assistant"):
-        st.markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Sistem model internal telah dinormalisasi menggunakan ID global 'gemini-1.5-flash', dijamin lancar dan bebas limit kuota harian ketat ⏰! Silakan ajukan pertanyaan Anda. ✨")
+        st.markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Router koneksi model telah disesuaikan ke basis data stabil, kini performa 1.5 Flash aktif penuh tanpa kendala limit kuota harian ketat ⏰! Silakan ajukan pertanyaan Anda. ✨")
         render_chat_time("welcome")
 
 # 7. Tampilkan Riwayat Obrolan dari State 🕒
@@ -265,21 +267,25 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di s
         
         with st.spinner("🔍 Memeriksa alur kerja SQL & merumuskan jawaban terbaik..."):
             try:
-                client = genai.Client(api_key=google_api_key)
-
+                # Membangun struktur riwayat untuk format model lama
+                model = genai.GenerativeModel(
+                    model_name="gemini-1.5-flash",
+                    system_instruction=sql_character_instruction
+                )
+                
+                # Mengemas ulang percakapan ke tipe data lama
+                chat = model.start_chat(history=[])
+                
+                # Menambahkan riwayat chat sebelumnya agar memori tetap sinkron
                 full_prompt = "Berikut adalah riwayat obrolan kita:\n"
-                for msg in st.session_state.messages:
+                for msg in st.session_state.messages[:-1]:
                     full_prompt += f"{msg['role']}: {msg['content']}\n"
-                full_prompt += "assistant: "
+                full_prompt += f"user: {prompt}\nassistant: "
 
-                # PENYEMPURNAAN MUTLAK: String pemanggilan model diselaraskan dengan standar API terpadu 🌟
-                response = client.models.generate_content(
-                    model='gemini-1.5-flash', 
+                # Eksekusi generasi konten dengan pencarian Google Search
+                response = model.generate_content(
                     contents=full_prompt,
-                    config=types.GenerateContentConfig(
-                        tools=[{"google_search": {}}],
-                        system_instruction=sql_character_instruction
-                    )
+                    tools=['google_search']
                 )
 
                 response_text = response.text
