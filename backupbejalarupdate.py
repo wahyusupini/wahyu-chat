@@ -244,7 +244,7 @@ if reset_button:
 # 6. Tampilkan Welcome Message Awal 👋
 if len(st.session_state.messages) == 0:
     with st.chat_message("assistant"):
-        st.markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Router koneksi model telah disesuaikan ke basis data stabil, kini performa 1.5 Flash aktif penuh tanpa kendala limit kuota harian ketat ⏰! Silakan ajukan pertanyaan Anda. ✨")
+        st.markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Router koneksi dan fungsi penelusuran Google Search telah diperbaiki total, kini model 1.5 Flash aktif penuh tanpa kendala sistem ⏰! Silakan ajukan pertanyaan Anda. ✨")
         render_chat_time("welcome")
 
 # 7. Tampilkan Riwayat Obrolan dari State 🕒
@@ -274,18 +274,15 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di s
                 )
                 
                 # Mengemas ulang percakapan ke tipe data lama
-                chat = model.start_chat(history=[])
-                
-                # Menambahkan riwayat chat sebelumnya agar memori tetap sinkron
                 full_prompt = "Berikut adalah riwayat obrolan kita:\n"
                 for msg in st.session_state.messages[:-1]:
                     full_prompt += f"{msg['role']}: {msg['content']}\n"
                 full_prompt += f"user: {prompt}\nassistant: "
 
-                # Eksekusi generasi konten dengan pencarian Google Search
+                # PERBAIKAN STRUKTUR: Mendefinisikan alat pencarian Google sesuai standar pustaka lama 🛠️
                 response = model.generate_content(
                     contents=full_prompt,
-                    tools=['google_search']
+                    tools=[{"google_search_retrieval": {"dynamic_retrieval_config": {"mode": "MODE_DYNAMIC"}}}]
                 )
 
                 response_text = response.text
