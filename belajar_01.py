@@ -4,7 +4,7 @@ from google.genai import types
 import time
 
 # 1. Konfigurasi Halaman Utama 🚀
-st.set_page_config(page_title="Gemini SQL Chatbot Pro", page_icon="💻", layout="centered")
+st.set_page_config(page_title="Gemini SQL ChatBot Pro By Wahyu", page_icon="💻", layout="centered")
 
 # ==================== FITUR PREMIUM: CUSTOM CSS BACKGROUND & JAM NEON TERANG ====================
 st.markdown("""
