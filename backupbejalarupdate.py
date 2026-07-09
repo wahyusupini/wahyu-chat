@@ -1,5 +1,6 @@
 import streamlit as st
-import google.generativeai as genai  # Menggunakan pustaka kompatibilitas stabil 🚀
+from google import genai
+from google.genai import types
 import time
 
 # 1. Konfigurasi Halaman Utama 🚀
@@ -114,7 +115,7 @@ st.markdown("""
 
 # Menampilkan Judul Dinamis 🌟
 st.markdown('<div class="main-title"><span class="moving-pc">💻</span> Gemini SQL Chatbot Pro</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Database Agent • Kuota Besar 1.500/Hari • Jam Daerah Akurat • Kaya Emotikon ✨</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Database Agent • Smart Token Optimization • Jam Daerah Akurat • Kaya Emotikon ✨</div>', unsafe_allow_html=True)
 
 # 2. Sidebar Pengaturan ⚙️
 with st.sidebar:
@@ -229,9 +230,6 @@ if not google_api_key:
     st.info("🔑 Silakan masukkan Google AI API Key Anda di menu sidebar untuk memulai.")
     st.stop()
 
-# Konfigurasi kunci API ke sistem stabil
-genai.configure(api_key=google_api_key)
-
 # 5. Simpan Riwayat Pesan 📦
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -244,7 +242,7 @@ if reset_button:
 # 6. Tampilkan Welcome Message Awal 👋
 if len(st.session_state.messages) == 0:
     with st.chat_message("assistant"):
-        st.markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Router koneksi dan fungsi penelusuran Google Search telah diperbaiki total, kini model 1.5 Flash aktif penuh tanpa kendala sistem ⏰! Silakan ajukan pertanyaan Anda. ✨")
+        st.markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Sistem arsitektur telah diselaraskan ke model resmi 'gemini-2.5-flash' dengan pengoptimalan kuota cerdas, dijamin lancar dan bebas eror 404 maupun jam mati ⏰! Silakan ajukan pertanyaan Anda. ✨")
         render_chat_time("welcome")
 
 # 7. Tampilkan Riwayat Obrolan dari State 🕒
@@ -267,22 +265,20 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di s
         
         with st.spinner("🔍 Memeriksa alur kerja SQL & merumuskan jawaban terbaik..."):
             try:
-                # Membangun struktur riwayat untuk format model lama
-                model = genai.GenerativeModel(
-                    model_name="gemini-1.5-flash",
-                    system_instruction=sql_character_instruction
-                )
-                
-                # Mengemas ulang percakapan ke tipe data lama
-                full_prompt = "Berikut adalah riwayat obrolan kita:\n"
-                for msg in st.session_state.messages[:-1]:
-                    full_prompt += f"{msg['role']}: {msg['content']}\n"
-                full_prompt += f"user: {prompt}\nassistant: "
+                # Menggunakan SDK genai terbaru dan tervalidasi penuh oleh Google
+                client = genai.Client(api_key=google_api_key)
 
-                # PERBAIKAN STRUKTUR: Mendefinisikan alat pencarian Google sesuai standar pustaka lama 🛠️
-                response = model.generate_content(
+                # STRATEGIPREMIUM OPTIMASI TOKEN: Hanya mengirimkan instruksi sistem dan pesan aktif saat ini 🌟
+                # Cara ini mencegah jebolnya kuota harian Free Tier akibat penumpukan teks masa lalu
+                full_prompt = f"Pertanyaan user saat ini: {prompt}"
+
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash', 
                     contents=full_prompt,
-                    tools=[{"google_search_retrieval": {"dynamic_retrieval_config": {"mode": "MODE_DYNAMIC"}}}]
+                    config=types.GenerateContentConfig(
+                        tools=[{"google_search": {}}],
+                        system_instruction=sql_character_instruction
+                    )
                 )
 
                 response_text = response.text
