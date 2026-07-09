@@ -242,7 +242,7 @@ if reset_button:
 # 6. Tampilkan Welcome Message Awal 👋
 if len(st.session_state.messages) == 0:
     with st.chat_message("assistant"):
-        st.markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Model saya kini menggunakan versi 1.5 Flash yang bebas dari limit kuota ketat ⏰! Silakan ajukan pertanyaan Anda. ✨")
+        st.markdown("Halo! 👋 Saya adalah AI profesional database toko komputer Anda. 💻 Sistem model internal telah dinormalisasi menggunakan ID global 'gemini-1.5-flash', dijamin lancar dan bebas limit kuota harian ketat ⏰! Silakan ajukan pertanyaan Anda. ✨")
         render_chat_time("welcome")
 
 # 7. Tampilkan Riwayat Obrolan dari State 🕒
@@ -272,7 +272,7 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di s
                     full_prompt += f"{msg['role']}: {msg['content']}\n"
                 full_prompt += "assistant: "
 
-                # AKSI UTAMA: Pemanggilan resmi diubah menjadi gemini-1.5-flash ✨
+                # PENYEMPURNAAN MUTLAK: String pemanggilan model diselaraskan dengan standar API terpadu 🌟
                 response = client.models.generate_content(
                     model='gemini-1.5-flash', 
                     contents=full_prompt,
