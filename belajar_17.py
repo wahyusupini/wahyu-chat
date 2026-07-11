@@ -16,7 +16,7 @@ st.markdown("""
     .stApp {
         background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%) !important;
     }
-    
+
     /* 2. Mengubah Desain Sidebar menjadi Efek Kaca (Glassmorphic) 🔮 */
     [data-testid="stSidebar"] {
         background-color: rgba(255, 255, 255, 0.4) !important;
@@ -31,7 +31,7 @@ st.markdown("""
     .block-container-sidebar {
         margin-top: -30px !important;
     }
-    
+
     /* 3. FITUR KEREN: Judul Bergerak Melayang & Berubah Warna 🌈 */
     @keyframes floatAndGlow {
         0% { transform: translateY(0px); background-position: 0% 50%; }
@@ -50,13 +50,13 @@ st.markdown("""
         -webkit-text-fill-color: transparent;
         animation: floatAndGlow 4s ease-in-out infinite;
     }
-    
+
     /* Animasi Bawaan Tetap Dipertahankan untuk Lambang Gemini Baru ✨ */
     .moving-gemini {
         display: inline-block;
         animation: geminiRotateBounce 3s ease-in-out infinite;
     }
-    
+
     @keyframes geminiRotateBounce {
         0% { transform: scale(1) rotate(0deg); }
         25% { transform: scale(1.15) rotate(15deg); }
@@ -64,7 +64,7 @@ st.markdown("""
         75% { transform: scale(1.15) rotate(10deg); }
         100% { transform: scale(1) rotate(0deg); }
     }
-    
+
     .subtitle {
         text-align: center;
         color: #64748b;
@@ -73,7 +73,7 @@ st.markdown("""
         margin-bottom: 25px;
         letter-spacing: 0.5px;
     }
-    
+
     /* 4. Animasi Bergerak Muncul pada Balon Chat 💬 */
     @keyframes chatPopUp {
         0% { opacity: 0; transform: translateY(20px) scale(0.98); }
@@ -83,7 +83,7 @@ st.markdown("""
     [data-testid="stChatMessage"] {
         animation: chatPopUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    
+
     /* 5. Kustomisasi & Animasi Karakter Avatar (User & Bot) 🧑‍💻 */
     @keyframes avatarBreath {
         0% { transform: translateY(0px); }
@@ -97,7 +97,7 @@ st.markdown("""
         box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
         animation: avatarBreath 3s ease-in-out infinite;
     }
-    
+
     [data-testid="stChatMessage"] img[src*="assistant"] {
         content: url("https://cdn-icons-png.flaticon.com/512/8943/8943377.png") !important;
         border-radius: 50%;
@@ -110,7 +110,7 @@ st.markdown("""
         transform: scale(1.25) rotate(12deg);
         transition: transform 0.4s ease;
     }
-    
+
     /* 6. GAYA JAM NEON TERANG BISA DIBACA ⏰ */
     .time-badge {
         font-size: 0.8rem;
@@ -125,72 +125,64 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-# ==============================================================================
 
 # Menampilkan Judul Utama Dinamis dengan Lambang Gemini ✨
 st.markdown('<div class="main-title"><span class="moving-gemini">✨</span> Gemini & OpenAI Chatbot Pro</div>', unsafe_allow_html=True)
 
-# Subjudul Baru yang Minimalis Sesuai Perintah Anda
+# Subjudul Baru yang Minimalis
 st.markdown('<div class="subtitle">Multi-Engine Agent</div>', unsafe_allow_html=True)
 
 # ==============================================================================
 # 2. SIDEBAR CONFIGURATION (MENTOK KE ATAS & ELEGAN) ⚙️
 # ==============================================================================
 voice_params = {
-    "👩 Sari (Suara Utama - Lembut & Natural)":     {"pitch": 1.15, "rate": 0.98},
-    "👩 Dian (Eksekutif - Formal & Profesional)":   {"pitch": 1.05, "rate": 1.02},
-    "👩 Nadia (Customer Service - Ramah & Cepat)":  {"pitch": 1.25, "rate": 1.12},
-    "👩 Amalia (Presenter - Jelas & Berirama)":     {"pitch": 1.10, "rate": 1.00},
-    "👩 Citra (Gaya Santai - Akrab & Logat Kota)":  {"pitch": 1.20, "rate": 1.05},
-    "👨 Budi (Suara Utama - Berat & Karismatik)":   {"pitch": 0.72, "rate": 0.92},
-    "👨 Andika (Narator - Tegas & Berwibawa)":        {"pitch": 0.65, "rate": 0.98},
-    "👨 Rendi (Teknisi Toko - Cepat & Energetik)":   {"pitch": 0.88, "rate": 1.15},
-    "👨 Gunawan (Manajer - Tenang & Bijaksana)":     {"pitch": 0.78, "rate": 0.90},
-    "👨 Fajar (Gaya Santai - Casual & Friendly)":    {"pitch": 0.85, "rate": 1.02}
+    "👩 Sari (Suara Utama - Lembut & Natural)": {"pitch": 1.15, "rate": 0.98},
+    "👩 Dian (Eksekutif - Formal & Profesional)": {"pitch": 1.05, "rate": 1.02},
+    "👩 Nadia (Customer Service - Ramah & Cepat)": {"pitch": 1.25, "rate": 1.12},
+    "👩 Amalia (Presenter - Jelas & Berirama)": {"pitch": 1.10, "rate": 1.00},
+    "👩 Citra (Gaya Santai - Akrab & Logat Kota)": {"pitch": 1.20, "rate": 1.05},
+    "👨 Budi (Suara Utama - Berat & Karismatik)": {"pitch": 0.72, "rate": 0.92},
+    "👨 Andika (Narator - Tegas & Berwibawa)": {"pitch": 0.65, "rate": 0.98},
+    "👨 Rendi (Teknisi Toko - Cepat & Energetik)": {"pitch": 0.88, "rate": 1.15},
+    "👨 Gunawan (Manajer - Tenang & Bijaksana)": {"pitch": 0.78, "rate": 0.90},
+    "👨 Fajar (Gaya Santai - Casual & Friendly)": {"pitch": 0.85, "rate": 1.02}
 }
 
 with st.sidebar:
-    # Pembungkus div CSS agar posisi langsung naik ke batas paling atas sidebar
     st.markdown('<div class="block-container-sidebar"></div>', unsafe_allow_html=True)
-    
-    # Elemen Pertama langsung dimulai dari Pemilihan Mesin AI Utama
+
     ai_engine = st.radio("Pilih Mesin AI Utama:", ["Google Gemini", "OpenAI GPT"], index=0)
-    
-    # Input API Key adaptif berdasarkan pilihan mesin
+
     if ai_engine == "Google Gemini":
         api_key = st.text_input("Google AI API Key", type="password", placeholder="Masukkan Gemini API Key...")
     else:
         api_key = st.text_input("OpenAI API Key", type="password", placeholder="Masukkan OpenAI API Key...")
         st.markdown("[Get an OpenAI API key](https://platform.openai.com/account/api-keys)")
-    
+
     st.markdown("[View the source code on GitHub](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)")
     st.markdown("[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)")
-    
+
     st.markdown("---")
     st.subheader("🔊 Opsi Suara Realistis")
     enable_voice = st.checkbox("Aktifkan Suara Bot (Auto-Speak)", value=False)
-    
     voice_character = st.selectbox("Pilih Agen Suara Realistis:", list(voice_params.keys()))
-    
-    # ==================== FITUR WHATSAPP-LIKE VIDEO UPLOAD (MAX 10 MB) ====================
+
     st.markdown("---")
     st.subheader("📹 Kirim Video (Maks 10 MB)")
     uploaded_video = st.file_uploader(
-        "Pilih video ala WhatsApp...", 
-        type=["mp4", "mov", "avi", "mkv"], 
+        "Pilih video ala WhatsApp...",
+        type=["mp4", "mov", "avi", "mkv"],
         help="Maksimal ukuran file video adalah 10 MB mirip batas kompresi dokumen WhatsApp."
     )
-    
+
     if uploaded_video is not None:
-        # Cek ukuran file (10 MB = 10 * 1024 * 1024 Bytes)
         max_size = 10 * 1024 * 1024
         if uploaded_video.size > max_size:
             st.error("❌ Ukuran video melebihi batas 10 MB! Silakan kompresi video Anda.")
         else:
             st.success("✅ Video berhasil diunggah!")
             st.video(uploaded_video)
-    # ============================================================================================
-    
+
     st.markdown("---")
     reset_button = st.button("🔄 Reset Percakapan", use_container_width=True)
 
@@ -228,6 +220,19 @@ Jawablah menggunakan data paling valid dan terbaru dari Google Search jika diper
 
 def render_chat_time(unique_id):
     html_code = f"""
+    <style>
+    .time-badge {{
+        font-family: sans-serif;
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
+        padding: 3px 10px !important;
+        border-radius: 6px !important;
+        display: inline-block !important;
+        box-shadow: 0px 3px 8px rgba(59, 130, 246, 0.5) !important;
+    }}
+    </style>
     <div id="wrapper_{unique_id}">
         <span class="time-badge">⏰ <span id="clock_{unique_id}">--:--</span></span>
     </div>
@@ -244,7 +249,7 @@ def render_chat_time(unique_id):
         }})();
     </script>
     """
-    return st.components.v1.html(html_code, height=35)
+    return st.iframe(src="data:text/html;charset=utf-8," + html_code, height=45)
 
 # ==============================================================================
 # 4. CHAT HISTORY RUNTIME 📦
@@ -256,18 +261,15 @@ if reset_button:
     st.session_state.messages = []
     st.rerun()
 
-# Validasi Kelayakan API Key Sebelum Memulai Chat
 if not api_key:
     st.info(f"🔑 Silakan masukkan {ai_engine} API Key Anda di menu sidebar untuk memulai.")
     st.stop()
 
-# Tampilkan Welcome Message Awal jika Room Chat Kosong
 if len(st.session_state.messages) == 0:
     with st.chat_message("assistant"):
         st.markdown(f"Halo! 👋 Saya adalah AI profesional database toko komputer Anda yang ditenagai oleh **{ai_engine}**. Sistem arsitektur teroptimasi penuh menjamin kelancaran respons tanpa kendala jam mati ⏰! Silakan ajukan pertanyaan Anda. ✨")
         render_chat_time("welcome")
 
-# Render Ulang Riwayat Chat
 for idx, msg in enumerate(st.session_state.messages):
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
@@ -277,7 +279,7 @@ for idx, msg in enumerate(st.session_state.messages):
 # 5. CORE AI PROCESSING ENGINE 🗣️
 # ==============================================================================
 if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di sini... 💬"):
-    
+
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -285,18 +287,17 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di s
 
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
-        
+
         with st.spinner(f"🔍 [{ai_engine}] Merumuskan jawaban terbaik berdasarkan basis data..."):
             try:
                 response_text = ""
-                
-                # JALUR EKSEKUSI 1: GOOGLE GEMINI
+
                 if ai_engine == "Google Gemini":
                     client = genai.Client(api_key=api_key)
                     full_prompt = f"Pertanyaan user saat ini: {prompt}"
-                    
+
                     response = client.models.generate_content(
-                        model='gemini-2.5-flash', 
+                        model='gemini-2.5-flash',
                         contents=full_prompt,
                         config=types.GenerateContentConfig(
                             tools=[{"google_search": {}}],
@@ -304,45 +305,42 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di s
                         )
                     )
                     response_text = response.text
-                
-                # JALUR EKSEKUSI 2: OPENAI GPT
+
                 else:
                     client = OpenAI(api_key=api_key)
                     openai_messages = [{"role": "system", "content": sql_character_instruction}]
                     for msg in st.session_state.messages:
                         openai_messages.append({"role": msg["role"], "content": msg["content"]})
-                    
+
                     response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=openai_messages
                     )
                     response_text = response.choices[0].message.content
 
-                # Efek Typing Animasi ⚡
                 displayed_text = ""
                 for char in response_text:
                     displayed_text += char
                     message_placeholder.markdown(displayed_text + "▌")
                     time.sleep(0.002)
-                
+
                 message_placeholder.markdown(response_text)
                 render_chat_time(f"bot_{len(st.session_state.messages)}")
-                
+
                 st.session_state.messages.append({"role": "assistant", "content": response_text})
 
-                # FITUR PREMIUM AUTO-SPEAK TEXT TO SPEECH (TTS) 🎵
                 if enable_voice:
                     clean_text = response_text.replace("*", "").replace("#", "").replace("`", "").replace("\n", " ")
                     selected_pitch = voice_params[voice_character]["pitch"]
                     selected_rate = voice_params[voice_character]["rate"]
-                    
+
                     components_code = f"""
                     <script>
                     var msg = new SpeechSynthesisUtterance({repr(clean_text)});
                     msg.lang = 'id-ID'; 
                     msg.pitch = {selected_pitch}; 
                     msg.rate = {selected_rate};   
-                    
+
                     var voices = window.speechSynthesis.getVoices();
                     for(var i = 0; i < voices.length; i++) {{
                         if(voices[i].lang.indexOf('id') > -1 || voices[i].name.toLowerCase().includes('indonesia')) {{
@@ -353,7 +351,7 @@ if prompt := st.chat_input("Ketik pertanyaan seputar database toko komputer di s
                     window.speechSynthesis.speak(msg);
                     </script>
                     """
-                    st.components.v1.html(components_code, height=0, width=0)
+                    st.iframe(src="data:text/html;charset=utf-8," + components_code, height=0, width=0)
 
             except Exception as e:
                 st.error(f"Terjadi kendala saat memproses instruksi engine AI: {e}")
